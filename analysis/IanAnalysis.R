@@ -1,16 +1,15 @@
+# Meta --------------------------------------------------------------------
+# Project:       Decision Assistance and Insurance Choice
+# Author:        E. Saltzman & I. McCarthy
+# Date Created:  10/11/2019
+# Date Edited:   10/15/2019
 
-###########################################################################
-## Project:       Decision Assistance and Insurance Choice
-## Author:        E. Saltzman & I. McCarthy
-## Date Created:  10/11/2019
-## Date Edited:   10/11/2019
-###########################################################################
+
+# Preliminaries -----------------------------------------------------------
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate)
 
-
-# Preliminaries -----------------------------------------------------------
 
 ## Load data
 setwd("D:/CloudStation/Professional/Research Projects/ACA Decision Support/data")
@@ -54,11 +53,11 @@ plan_data <- plan_data %>%
 # Clean Individual Data ---------------------------------------------------
 
 ## Drop all uninsured records for this analysis
-data <- data %>%
+data.clean <- data %>%
   filter(!is.na(plan_id))
 
 ## Create Age Group Variable
-data <- data %>%
+data.clean <- data.clean %>%
   mutate(
     age_group=case_when(
       AGE < 18 ~ "0to17",
@@ -73,8 +72,8 @@ data <- data %>%
   )
 
 
-## Genders
-data <- data %>%
+## Gender
+data.clean <- data.clean %>%
   mutate(
     Gender = case_when(
       gender == 1 ~ "Male",
@@ -82,8 +81,8 @@ data <- data %>%
     )
   )
 
-# Metal
-data <- data %>%
+## Metal
+data.clean <- data.clean %>%
   mutate(metal = as.character(metal_level_enhanced),
          metal = replace(metal, metal %in% c("Silver - Enhanced 73",
                                              "Silver - Enhanced 87",
@@ -92,44 +91,65 @@ data <- data %>%
          metal = replace(metal, metal == "Minimum Coverage", "Catastrophic"))
 
 
-# Subsidized/Unsubsidized
+## Subsidies
+data.clean <- data.clean %>%
+  left_join( (households %>% select(household_id, year, subsidized_members)),
+             by=c("household_id","year")) %>%
+  mutate(subsidy_eligible = as.numeric(subsidized_members>0),
+         subsidized = case_when(
+           subsidy_eligible == 1 ~ "Subsidized",
+           subsidy_eligible == 0 ~ "Unsubsidized",
+           TRUE ~ NA_character_
+         ),
+         csr_eligible = as.numeric(subsidized == "Subsidized" & FPL <= 2.50)
+  )
+
+
+
+## Network type
+data.clean <- data.clean %>%
+  separate(zip_region_year, c(NA,"region",NA), sep="_") %>%
+  mutate(region = as.integer(region)) %>%
+  left_join( (plan_data %>% 
+                select(plan_name=Plan_Name, region, 
+                       year=ENROLLMENT_YEAR, 
+                       plan_network_type=PLAN_NETWORK_TYPE) %>%
+                mutate(plan_name=as.character(plan_name))),
+             by=c("plan_name","region","year")) %>%
+  mutate(plan_network_type=as.character(plan_network_type))
+
+## Income groups
+data.clean <- data.clean %>%
+  mutate(
+    subsidy_fpl_bracket = case_when(
+      FPL <= 1.38 ~ "138% FPL or less",
+      FPL > 1.38 & FPL <= 1.50 ~ "138% FPL to 150% FPL",
+      FPL > 1.50 & FPL <= 2.00 ~ "150% FPL to 200% FPL",
+      FPL > 2.00 & FPL <= 2.50 ~ "200% FPL to 250% FPL",
+      FPL > 2.50 & FPL <= 4.00 ~ "250% FPL to 400% FPL",
+      FPL > 4.00 ~ "400% FPL or greater",
+      TRUE ~ NA_character_
+    )
+  )
+
+## Language
+data.clean <- data.clean %>%
+  mutate(
+    language = case_when(
+      language_spoken == "English" ~ "English",
+      language_spoken == "Spanish" ~ "Spansih",
+      !(language_spoken %in% c("(nonres","English","Spanish")) ~ "Other Language",
+      TRUE ~ NA_character_
+    )
+  )
+
+
+
+###### start back here
 
 
 
 
-
-
-
-
-data$subsidy_eligible <- as.numeric(households[data$household_year,"subsidized_members"] > 0)
-data$subsidized <- as.character(data$subsidy_eligible) 
-data[data$subsidized == "1" & !is.na(data$subsidized),"subsidized"] <- "Subsidized"
-data[data$subsidized == "0" & !is.na(data$subsidized),"subsidized"] <- "Unsubsidized"
-
-# CSR Eligible
-data$csr_eligible <- as.numeric(data$subsidized == "Subsidized" & data$FPL <= 2.50)
-
-
-# Plan network type/etc
-plan_data$PLAN_NETWORK_TYPE <- as.character(plan_data$PLAN_NETWORK_TYPE)
-data$plan_network_type <- NA
-data[!is.na(data$plan_id),"plan_network_type"] <- plan_data[data[!is.na(data$plan_id),"plan_id"],"PLAN_NETWORK_TYPE"]
-
-# Income Groups
-data$subsidy_fpl_bracket <- NA
-data[data$FPL <= 1.38 & !is.na(data$FPL),"subsidy_fpl_bracket"] <- "138% FPL or less"
-data[data$FPL > 1.38 & data$FPL <= 1.50 & !is.na(data$FPL),"subsidy_fpl_bracket"] <- "138% FPL to 150% FPL"
-data[data$FPL > 1.50 & data$FPL <= 2.00 & !is.na(data$FPL),"subsidy_fpl_bracket"] <- "150% FPL to 200% FPL"
-data[data$FPL > 2.00 & data$FPL <= 2.50 & !is.na(data$FPL),"subsidy_fpl_bracket"] <- "200% FPL to 250% FPL"
-data[data$FPL > 2.50 & data$FPL <= 4.00 & !is.na(data$FPL),"subsidy_fpl_bracket"] <- "250% FPL to 400% FPL"
-data[data$FPL > 4.00 & !is.na(data$FPL),"subsidy_fpl_bracket"] <- "400% FPL or greater"
-
-# Language
-data$language <- as.character(data$language_spoken)
-data[data$language == "English","language"] <- "English"
-data[data$language == "Spanish","language"] <- "Spanish"
-data[!data$language %in% c("(nonres","English","Spanish"),"language"] <- "Other Language"
-data[data$language == "(nonres","language"] <- NA
 
 # Previous plan
 data$previous_plan_number <- households[data$household_year,"previous_plan_number"]
