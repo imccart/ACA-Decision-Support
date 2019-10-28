@@ -119,7 +119,7 @@ data.clean <- data.clean %>%
   mutate(
     language = case_when(
       language_spoken == "English" ~ "English",
-      language_spoken == "Spanish" ~ "Spansih",
+      language_spoken == "Spanish" ~ "Spanish",
       !(language_spoken %in% c("(nonres","English","Spanish")) ~ "Other Language",
       TRUE ~ NA_character_
     )
@@ -187,29 +187,41 @@ data.clean <- data.clean %>%
              TRUE ~ as.character(service_channel)
            ))
 
+data.pre2018 <- data.clean %>% filter(year<2018)
+
+## DD data
+data.dd <- data.clean %>%
+  group_by(individual_id) %>%
+  mutate(csr_post = (csr_eligible*(year>=2018) & subsidy_fpl_bracket %in% c("138% FPL or less","138% FPL to 150% FPL")),
+         switch_plan = (plan_number!=previous_plan_number & !is.na(previous_plan_number))) %>%
+  ungroup()
+
+
 
 # Summary Statistics ------------------------------------------------------
 
 
 ## metal by type of assistance (all enrollees)
-metal.assist.all <- data.clean %>% group_by(channel, metal) %>%
+metal.assist.all <- data.pre2018 %>% group_by(channel, metal) %>%
   summarize(metal_count=n()) %>%
   mutate(metal_pct=metal_count/sum(metal_count),
          metal_pct=round(metal_pct,3))
 
 ## metal by type of assistance (new enrollees)
-metal.assist.new <- data.clean %>% filter(is.na(previous_plan_number)) %>%
+metal.assist.new <- data.pre2018 %>% filter(is.na(previous_plan_number)) %>%
   group_by(channel, metal) %>%
   summarize(metal_count=n()) %>%
   mutate(metal_pct=metal_count/sum(metal_count),
          metal_pct=round(metal_pct))
 
+## table of assistance and tier choice
 kable(metal.assist.all[,2:4], "latex", booktabs=T, 
       col.names=c("Tier"," Count", "Percent")) %>%
   group_rows("Insurance Agent", 1, 5) %>%
   group_rows("Other Assitance", 6, 10) %>%
   group_rows("Unassisted", 11, 15)
 
+## figure of assistance and tier choice
 stack.all <- ggplot(data.clean) +
   geom_bar(mapping=aes(x=channel,fill=metal),
            position="fill", color="black") +
@@ -220,17 +232,18 @@ stack.all <- ggplot(data.clean) +
   ) + theme_bw() +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys")
-ggsave("/figures/metal_stack_all.png", stack.all)
+ggsave("figures/metal_stack_all.png", stack.all)
 
-enrollee.count.all <- data.clean %>% count(year) %>%
+## data on enrollees per year
+enrollee.count.all <- data.pre2018 %>% count(year) %>%
   rename(all_count=n)
-enrollee.count.new <- data.clean %>% filter(is.na(previous_plan_number)) %>%
+enrollee.count.new <- data.pre2018 %>% filter(is.na(previous_plan_number)) %>%
   count(year) %>% rename(new_count=n)
 enrollee.count <- enrollee.count.all %>%
   left_join(enrollee.count.new, by=c("year"))
 
+## graph of enrollees per year
 enrollee.count %>%
-  filter(year<2019) %>%
   ggplot() + geom_line(aes(x=year,y=all_count)) +
   geom_line(aes(x=year,y=new_count)) +
   labs(
@@ -238,28 +251,73 @@ enrollee.count %>%
     y="Enrollees"
   )
 
-mean.dom.choice <- mean(data.clean$dominated_choice, na.rm=T)
+
+# Summary values for paper ------------------------------------------------
+
+mean.dom.choice <- mean(data.pre2018$dominated_choice, na.rm=T)
+tot.enroll <- sum(enrollee.count$all_count)
+tot.enroll.new <- sum(enrollee.count$new_count)
+first.year <- min(enrollee.count$year)
+last.year <- max(enrollee.count$year)
 
 # Initial Regressions -----------------------------------------------------
 
-reg.data <- data.clean %>%
+reg.data <- data.pre2018 %>%
   mutate(channel = as.factor(channel),
          gender = as.factor(Gender),
          language = as.factor(language),
          race = as.factor(race),
          region = as.factor(region),
-         new_enrollee = is.na(previous_plan_number)) %>%
+         new_enrollee = is.na(previous_plan_number),
+         any_assist = (channel=="Insurance Agent" | channel=="Other Assistance"),
+         assist_agent = (channel=="Insurance Agent"),
+         assist_other = (channel=="Other Assistance")) %>%
   select(channel, gender, AGE, language, race, region,
          premium21, subsidy, cheapest_premium, rating_area, FPL,
-         dominated_choice, year, new_enrollee)
+         dominated_choice, year, new_enrollee, household_id, 
+         any_assist, assist_agent, assist_other)
 
-reg1 <- felm(dominated_choice ~ channel + gender + AGE + language + premium21 +
+reg1 <- felm(dominated_choice ~ any_assist + gender + AGE + language + premium21 +
        subsidy | region + year | 0 | region, 
      data=reg.data)
+
+reg2 <- felm(dominated_choice ~ any_assist + gender + AGE + language + premium21 +
+               subsidy | year + household_id | 0 | household_id, 
+             data=reg.data)
+
+reg3 <- felm(dominated_choice ~ assist_agent + assist_other + gender + AGE + language + premium21 +
+               subsidy | year + household_id | 0 | household_id, 
+             data=reg.data)
+
+
+## DD estimates
+reg.dd <- data.dd %>%
+  mutate(channel = as.factor(channel),
+         gender = as.factor(Gender),
+         language = as.factor(language),
+         race = as.factor(race),
+         region = as.factor(region),
+         new_enrollee = is.na(previous_plan_number),
+         any_assist = (channel=="Insurance Agent" | channel=="Other Assistance"),
+         assist_agent = (channel=="Insurance Agent"),
+         assist_other = (channel=="Other Assistance")) %>%
+  select(channel, gender, AGE, language, race, region,
+         premium21, subsidy, cheapest_premium, rating_area, FPL, any_assist,
+         dominated_choice, year, new_enrollee, household_id, csr_post, 
+         csr_eligible, switch_plan, assist_agent, assist_other)
+
+
+dd.reg1 <- felm(dominated_choice ~ any_assist + csr_post + any_assist*csr_post + gender + AGE + language + premium21 +
+                  subsidy | region + year | 0 | region, 
+                data= reg.dd )
+
+dd.reg2 <- felm(dominated_choice ~ any_assist + csr_post + any_assist*csr_post + gender + AGE + language + premium21 +
+                  subsidy | household_id + year | 0 | household_id, 
+                data= reg.dd )
 
 
 # Save workspace for knitr ------------------------------------------------
 
 rm(list=c("data", "data.clean", "households", "zip3_choices",
-          "plan_data", "product_definitions", "reg.data"))
-save.image("/data/R_workspace.Rdata")
+          "plan_data", "product_definitions", "reg.data", "dd.data", "data.pre2018"))
+save.image("data/R_workspace.Rdata")

@@ -1,4 +1,4 @@
-\documentclass[]{article}
+\documentclass[12pt,]{article}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
@@ -21,7 +21,7 @@
 \usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\usepackage[margin=1in]{geometry}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{hyperref}
 \hypersetup{unicode=true,
             pdftitle={Decision Support and Health Insurance Choice},
@@ -48,15 +48,6 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
-% Redefines (sub)paragraphs to behave more like sections
-\ifx\paragraph\undefined\else
-\let\oldparagraph\paragraph
-\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
-\fi
-\ifx\subparagraph\undefined\else
-\let\oldsubparagraph\subparagraph
-\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
-\fi
 
 %%% Use protect on footnotes to avoid problems with footnotes in titles
 \let\rmarkdownfootnote\footnote%
@@ -84,39 +75,122 @@
   \postdate{\par}
     \date{October 2019}
 
+\usepackage{setspace}
+\doublespacing
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+\titlespacing{\subsection}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+\titlespacing{\subsubsection}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
 
 \begin{document}
 \maketitle
 
 \hypertarget{background}{%
-\subsection{Background}\label{background}}
+\subsubsection{Background:}\label{background}}
+
+Health insurance markets are unique in many respects, not least of which
+is the increasing complexity of choosing an optimal health insurance
+plan. Such complexity has been well-documented in studies of health
+insurance choice in the Medicare Advantage market (Abaluck and Gruber
+2011; Ketcham et al. 2012; Gruber 2017). One way to reduce the burden of
+this complexity is to provide professional decision support through
+private insurance agents or public assistance programs, both of which
+are available in the California health insurance exchanges created under
+the Affordable Care Act (ACA). In this paper, we examine the role of
+this decision assistance on health insurance plan choice and its
+implications for consumer welfare.
 
 \hypertarget{data}{%
-\subsection{Data}\label{data}}
+\subsubsection{Data:}\label{data}}
+
+We have data on 6,401,473 enrollee/year observations from the California
+health insurance exhanges from 2014 to 2017. Our data include a variety
+of individual and household characteristics, plan choices and plan
+characteristics, and information on the type of decision assistance used
+by the enrollee (if any). From these data, we can identify each
+household's set of possible health insurance plans, and we employ
+premium and cost sharing subsidy formulas to calculate health insurance
+costs for each possible plan for each household.
 
 \hypertarget{methods}{%
-\subsection{Methods}\label{methods}}
+\subsubsection{Methods:}\label{methods}}
+
+We first estimate overall demand for health insurance using a nested
+logit discrete choice model, as in Saltzman (2019). We then identify
+specific instances in which the observed plan choice is dominated by
+some other plan in an individual's choice set. For example, Gold and
+Platinum tier plans are dominated for any household that is eligible for
+cost-sharing subsidies and with incomes below 150\% of the federal
+poverty level. We estimate the effect of decision assistance on
+dominated choices with a linear probability model, allowing for year and
+household fixed effects.
 
 \hypertarget{results}{%
-\subsection{Results}\label{results}}
+\subsubsection{Results:}\label{results}}
 
-As a first-order result, we establish strong evidence that decision
-assistance matters for insurance choice. Incorporating institutional
-details of the exchanges and insurance subsidies, we then identify
-instances in which individuals choose a strictly dominated health
-insurance plan. Here, we find that individuals who made an ``unassited''
-choice were 0.02 percentage points less likely to make a dominated
-choice. On a base of 3\%, this reflects a 0.8\(x\) increase in the
-probability of a dominated choice.
+Our nested logit models establish strong evidence that decision
+assistance matters for insurance choice. Turning specifically to
+dominated choices, our baseline results suggest that individuals with
+decision assistance are 0.37 percentage points less likely to make a
+dominated choice. On a base of 1.9\%, this reflects a 20\% decrease in
+the probability of making a dominated choice.
 
-Preliminary results further suggest strong heterogeneities across
-different types of decision assistance, with insurance-based decision
-support (i.e., insurance brokers) more likely to steer patients into
-plans offered by the sponsoring insurer. The steering effect appears
-sufficiently strong such that individuals using an insurance broker are
-no less likely to choose a dominated plan than individuals with no
-decision support. The reduction in prevalence of dominated choices is
-therefore driven entirely by publicly provided decision assistance.
+We also find strong heterogeneities in the effects of different forms of
+decision assistance. In particular, we find that individuals using
+publicly provided decision assistance are 0.43 percentage points less
+likely to select a dominated plan, while individuals using a private
+insurance agent are 0.16 percentage points less likely to select a
+dominated plan.
+
+\hypertarget{discussion}{%
+\subsubsection{Discussion:}\label{discussion}}
+
+Our current results provide strong evidence that decision assistance has
+a significant and economically meaningful effect on health insurance
+plan choice. In terms of dominated choices, our early results suggest
+that this change in decision-making is welfare improving, and we
+continue to explore other measures of choice dominance to further
+confirm this result.
+
+In future work, our identification strategy will exploit the Trump
+administration's removal of cost-sharing subisidies from the exchanges
+in 2018 and the subsequent response from insurers to increase premiums
+on their silver plans (``silver loading''). This response significantly
+changed the prevalence of dominated choices in each household's choice
+set, and in this way, the removal of the cost-sharing subsidies offers
+an exogenous change to the set of dominated plans available to each
+household.
+
+We are also extending our analysis of the differential effects between
+public decision support versus assistance from private insurance
+agents/brokers. This analysis will determine whether insurance brokers
+are more likely to steer patients into plans offered by the sponsoring
+insurer.
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\leavevmode\hypertarget{ref-abaluck2011}{}%
+Abaluck, Jason, and Jonathan Gruber. 2011. ``Heterogeneity in Choice
+Inconsistencies Among the Elderly: Evidence from Prescription Drug Plan
+Choice.'' \emph{American Economic Review} 101 (3): 377--81.
+
+\leavevmode\hypertarget{ref-gruber2017}{}%
+Gruber, Jonathan. 2017. ``Delivering Public Health Insurance Through
+Private Plan Choice in the United States.'' \emph{Journal of Economic
+Perspectives} 31 (4): 3--22.
+
+\leavevmode\hypertarget{ref-ketcham2012}{}%
+Ketcham, Jonathan D, Claudio Lucarelli, Eugenio J Miravete, and M
+Christopher Roebuck. 2012. ``Sinking, Swimming, or Learning to Swim in
+Medicare Part d.'' \emph{American Economic Review} 102 (6): 2639--73.
+
+\leavevmode\hypertarget{ref-saltzman2019}{}%
+Saltzman, Evan. 2019. ``Demand for Health Insurance: Evidence from the
+California and Washington Aca Exchanges.'' \emph{Journal of Health
+Economics} 63: 197--222.
 
 
 \end{document}
