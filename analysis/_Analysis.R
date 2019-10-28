@@ -1,9 +1,9 @@
 # Meta --------------------------------------------------------------------
 
 ## Title:         Decision Assistance and Health Insurance Choice
-## Author:        Ian McCarthy
+## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/11/2019
-## Date Edited:   10/15/2019
+## Date Edited:   10/28/2019
 ## Description:   Analysis file for project
 
 
