@@ -1,0 +1,29 @@
+---
+title: "Decision Support and Health Insurance Choice"
+author: Ian McCarthy & Evan Saltzman
+date: October 2019
+output: 
+  pdf_document:
+    keep_tex: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stargazer, knitr, kableExtra,
+               lfe)
+```
+
+```{r, include=FALSE}
+load("data/R_workspace.Rdata")
+```
+## Background
+
+## Data
+
+## Methods
+
+## Results
+As a first-order result, we establish strong evidence that decision assistance matters for insurance choice. Incorporating institutional details of the exchanges and insurance subsidies, we then identify instances in which individuals choose a strictly dominated health insurance plan. Here, we find that individuals who made an "unassited" choice were `r round(reg1$coeff[2],2)` percentage points less likely to make a dominated choice. On a base of `r round(mean.dom.choice,2)*100`%, this reflects a `r round(reg1$coeff[2]/mean.dom.choice,1)`$x$ increase in the probability of a dominated choice.
+
+Preliminary results further suggest strong heterogeneities across different types of decision assistance, with insurance-based decision support (i.e., insurance brokers) more likely to steer patients into plans offered by the sponsoring insurer. The steering effect appears sufficiently strong such that individuals using an insurance broker are no less likely to choose a dominated plan than individuals with no decision support. The reduction in prevalence of dominated choices is therefore driven entirely by publicly provided decision assistance.
