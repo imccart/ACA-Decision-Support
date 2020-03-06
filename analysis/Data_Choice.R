@@ -1,7 +1,7 @@
 # Meta --------------------------------------------------------------------
 
 ## Date Created:  3/4/2020
-## Date Edited:   3/4/2020
+## Date Edited:   3/6/2020
 ## Description:   Create dataset for choice model
 ## Notes:         This file requires that we've already created the household data
 ##                and the plan data.
@@ -30,41 +30,19 @@ hh.clean <- hh.clean %>%
 hh.clean <- hh.clean %>%
   add_predictions(outside_logit, "pred_oom", type="response") %>%
   mutate(pred_oom = ifelse(is.na(plan_number_nocsr),pred_oom,NA),
-         out_of_market = (pred_oom > mean(pred_oom, na.rm=TRUE)))
+         out_of_market = (pred_oom > mean(pred_oom, na.rm=TRUE))) %>%
+  filter(out_of_market == FALSE)
   
-
 
 data.clean <- data.clean %>%
-  left_join(hh.clean %>% select(household_id, year, pred_oom), 
+  left_join(hh.clean %>% select(household_id, year, out_of_market), 
             by=c("household_id","year")) %>%
-  filter(pred_oom>mean(pred_oom))
+  filter(out_of_market == FALSE)
 
 
-
-if(outside_sample) {
-  
+# Form choice sets --------------------------------------------------------
 
 
-  # Remove records from market - About 26.8% of uninsured records are kept 
-  households <- households[households$out_of_market == 0,]
-  data <- data[data$household_year %in% rownames(households),]
-  
-  #output <- cbind(by(households[households$year == 2014,"enrollees"],households[households$year == 2014,"rating_area"],sum),
-  #				by(households[households$year == 2015,"enrollees"],households[households$year == 2015,"rating_area"],sum),
-  #				by(households[households$year == 2016,"enrollees"],households[households$year == 2016,"rating_area"],sum),
-  #				by(households[households$year == 2017,"enrollees"],households[households$year == 2017,"rating_area"],sum),
-  #				by(households[households$year == 2018,"enrollees"],households[households$year == 2018,"rating_area"],sum),
-  #				by(households[households$year == 2019,"enrollees"],households[households$year == 2019,"rating_area"],sum))
-  # Inflate numbers to acount for the ones that had missing info
-  # output <- round(output * (missing_ms + nrow(households))/nrow(households))
-  #colnames(output) <- paste("Y",c(2014:2019),sep="")
-  #rownames(output) <- c(1:19)
-  #write.csv(output,"market_size_by_market_year.csv")
-  
-  
-}
-
-gc()
 
 
 ##### Choice Matrix (households by plans)
