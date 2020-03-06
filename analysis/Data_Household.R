@@ -1,17 +1,8 @@
 # Meta --------------------------------------------------------------------
 
-## Title:         Decision Assistance and Health Insurance Choice
-## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/11/2019
-## Date Edited:   11/4/2019
+## Date Edited:   3/4/2020
 ## Description:   Clean household-level dataset
-
-
-# Load data ---------------------------------------------------------------
-
-households <- get(load("data/ca_household_data_AUG022019")) # household-level data
-zip3.choices <- read.csv("data/zip3_choices2.csv",row.names = 1) # choice set by 3 digit zip and rating area
-product.definitions <- read.csv("data/product_definitions.csv",row.names = 1) # definitions of column names in zip3_choices
 
 
 # Clean Household Data ---------------------------------------------------

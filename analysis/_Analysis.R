@@ -1,14 +1,11 @@
 # Meta --------------------------------------------------------------------
 
-## Title:         Decision Assistance and Health Insurance Choice
-## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/11/2019
-## Date Edited:   11/4/2019
+## Date Edited:   3/4/2020
 ## Description:   Analysis file for project
 
 
-
-# Final Dataset -----------------------------------------------------------
+# Analytic Datasets -----------------------------------------------------------
 final.data <- data.hh %>%
   mutate(channel = as.factor(channel),
          new_enrollee = is.na(previous_plan_number),
@@ -30,7 +27,6 @@ final.data <- data.hh %>%
          insurer, hmo_ppo, metal,
          channel, any_assist, assist_agent, assist_other, dominated_choice, 
          region, rating_area, year, household_id)
-
 
 
 # Summary Statistics ------------------------------------------------------

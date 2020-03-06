@@ -1,15 +1,8 @@
 # Meta --------------------------------------------------------------------
 
-## Title:         Decision Assistance and Health Insurance Choice
-## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/11/2019
-## Date Edited:   11/5/2019
+## Date Edited:   3/4/2020
 ## Description:   Clean plan-level dataset
-
-
-# Load data ---------------------------------------------------------------
-
-plan.data <- read.csv("data/ca_plan_data2.csv") # Covered California plan data
 
 
 # Clean Plan Data ---------------------------------------------------------
