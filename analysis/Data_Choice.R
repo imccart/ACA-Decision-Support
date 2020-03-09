@@ -32,342 +32,71 @@ hh.clean <- hh.clean %>%
   mutate(pred_oom = ifelse(is.na(plan_number_nocsr),pred_oom,NA),
          out_of_market = (pred_oom > mean(pred_oom, na.rm=TRUE))) %>%
   filter(out_of_market == FALSE)
+hh.clean <- as_tibble(hh.clean)
   
 
 data.clean <- data.clean %>%
   left_join(hh.clean %>% select(household_id, year, out_of_market), 
             by=c("household_id","year")) %>%
   filter(out_of_market == FALSE)
+data.clean <- as_tibble(data.clean)
 
 
 # Form choice sets --------------------------------------------------------
 
+choice.set <- zip3.choices %>%
+  pivot_longer(c(-Year, -zip3, -Region), names_to = "plan_name", values_to = "offered") %>%
+  filter(!is.na(offered)) %>%
+  select(-offered)
+
+
+choice.data <- hh.clean %>% select(household_id, year, zip3, FPL, subsidized_members) %>%
+  full_join(choice.set, by=c("year"= "Year","zip3")) %>%
+  mutate(Issuer_Name = case_when(
+          str_detect(plan_name, "Anthem") ~ "Anthem",
+          str_detect(plan_name, "Blue_Shield") ~ "Blue_Shield",
+          str_detect(plan_name, "Health_Net") ~ "Health_Net",
+          str_detect(plan_name, "Kaiser") ~ "Kaiser",
+          str_detect(plan_name, "Molina") ~ "Molina",
+          str_detect(plan_name, "Sharp") ~ "SHARP",
+          str_detect(plan_name, "Chinese") ~ "Chinese_Community",
+          str_detect(plan_name, "Contra") ~ "Contra_Costa",
+          str_detect(plan_name, "LA_Care") ~ "LA_Care",
+          str_detect(plan_name, "Oscar") ~ "Oscar",
+          str_detect(plan_name, "United") ~ "United",
+          str_detect(plan_name, "Valley") ~ "Valley",
+          str_detect(plan_name, "Western") ~ "Western"),
+         PLAN_NETWORK_TYPE = case_when(
+          str_detect(plan_name, "HMO") ~ "HMO",
+          str_detect(plan_name, "EPO") ~ "EPO",
+          str_detect(plan_name, "PPO") ~ "PPO",
+          str_detect(plan_name, "HSP") ~ "HSP"),
+         MSP = case_when(
+           str_detect(plan_name, "MSP") ~ 1,
+           TRUE ~ 0),
+         Network_num = case_when(
+           str_detect(plan_name, "Sharp1") ~ 1,
+           str_detect(plan_name, "Sharp2") ~ 2,
+           TRUE ~ 1
+         ))
 
 
 
-##### Choice Matrix (households by plans)
-# 1 if household selected plan, 0 if household did not select plan, NA if plan not in choice set
-# Complication: households that selected multiple plans
+for (t in 2014:2019) {
 
-# NOTE: I am reordering plan data because I defined a plan_id number earlier based on a previous ordering
-plan_data$Plan_ID_Order <- as.character(plan_data$Plan_ID_Order)
-rownames(plan_data) <- paste(plan_data$Plan_Name,plan_data$ENROLLMENT_YEAR,
-                             plan_data$region,sep="")
-plan_data <- plan_data[plan_data$Plan_ID_Order,]
+  full.choice.data <- choice.data %>% filter(year==t) %>%
+    full_join(plan.data %>% mutate(Network_num=ifelse(is.na(Network_num),1,Network_num),
+                                   PLAN_NETWORK_TYPE=as.character(PLAN_NETWORK_TYPE)) %>%
+                filter(ENROLLMENT_YEAR==t), 
+              by=c("Issuer_Name","PLAN_NETWORK_TYPE","Network_num","MSP","Region"="region"))
+  
 
-plan_names <- sort(unique(plan_data$Plan_Name2))
-plan_numbers <- 1:length(plan_names)
-names(plan_numbers) <- plan_names
-#data$plan_number <- NA
-#data[!is.na(data$plan_id),"plan_number"] <- plan_numbers[data[!is.na(data$plan_id),"plan_name"]]
-data[is.na(data$plan_id),"plan_number"] <- max(data$plan_number,na.rm=TRUE) + 1
-plan_data$plan_number <- plan_numbers[plan_data$Plan_Name2]
-
-# Assign an integer to each plan (eliminating small plans
-plan_names_small <- sort(unique(plan_data$Plan_Name_Small))
-plan_numbers_small <- 1:length(plan_names_small)
-names(plan_numbers_small) <- plan_names_small
-#data$plan_number_small <- NA
-#data[!is.na(data$plan_id),"plan_number_small"] <- plan_numbers_small[data[!is.na(data$plan_id),"plan_name"]]
-#data[is.na(data$plan_id),"plan_number_small"] <- max(data$plan_number_small,na.rm=TRUE) + 1
-plan_data$plan_number_small <- plan_numbers_small[plan_data$Plan_Name_Small]
-
-# This will link the full plan number to the small plan number
-reference_numbers <- plan_numbers
-for(j in 1:length(reference_numbers)){
-  reference_plan_name <- unique(plan_data[which(plan_data$Plan_Name == names(plan_numbers)[j]),"Plan_Name_Small"]) 
-  reference_numbers[j] <- plan_numbers_small[reference_plan_name]
 }
 
-plan_data$Issuer_Name <- as.character(plan_data$Issuer_Name)
-plan_data[plan_data$Issuer_Name == "Anthem Blue Cross","Issuer_Name"] <- "Anthem"
-plan_data[plan_data$Issuer_Name == "Blue Shield","Issuer_Name"] <- "Blue_Shield"
-plan_data[plan_data$Issuer_Name == "Chinese Community","Issuer_Name"] <- "Chinese_Community"
-plan_data[plan_data$Issuer_Name == "Contra Costa Health Plan","Issuer_Name"] <- "Contra_Costa"
-plan_data[plan_data$Issuer_Name == "Health Net","Issuer_Name"] <- "Health_Net"
-plan_data[plan_data$Issuer_Name == "LA Care","Issuer_Name"] <- "LA_Care"
-plan_data[plan_data$Issuer_Name == "UnitedHealthcare","Issuer_Name"] <- "United"
-plan_data[plan_data$Issuer_Name == "Western Health","Issuer_Name"] <- "Western"
-plan_data[plan_data$Issuer_Name == "Sharp","Issuer_Name"] <- "SHARP"
 
-zipchoices <- as.matrix(zip3_choices[,4:ncol(zip3_choices)])
-product_definitions$insurer <- as.character(product_definitions$insurer)
-product_definitions$plan_network_type <- as.character(product_definitions$plan_network_type)
-single_product_insurers <- c("Chinese_Community","Contra_Costa","Kaiser","LA_Care","Molina",
-                             "Oscar","United","Valley","Western")
-large_insurers <- c("Anthem","Blue_Shield","Kaiser","Health_Net","Molina")
-#households$zip_region_year <- paste(households$zip_3,households$rating_area,households$year,sep="_")			
 
-# Initialize choice and new plans matrix
-choices <- matrix(NA,nrow=dim(households)[1],ncol=length(plan_names_small),dimnames=list(rownames(households),plan_names_small))	
-new_choices <- matrix(0,nrow=dim(households)[1],ncol=length(plan_names_small),dimnames=list(rownames(households),plan_names_small))	
 
-# Households
-households$change_in_products <- 0
-households$change_in_insurers <- 0
-households$change_in_large_insurers <- 0
-households$market_turnover <- 0
 
-# Choices for the exchange population for which we have 3-digit zip (plan has to be offered in year and zip)
-for(i in rownames(zip3_choices)) {
-  
-  t <- zip3_choices[i,"Year"]
-  
-  # Get the broad product categories available (insurer/network type/etc. - no metal)
-  region_year_plans <- which(plan_data$ENROLLMENT_YEAR == t &
-                               plan_data$region == zip3_choices[i,"Region"])
-  available_products <- zipchoices[i,]
-  available_products <- names(available_products)[!is.na(available_products)]
-  available_insurers <- unique(product_definitions[available_products,"insurer"])
-  large_available_insurers <- intersect(large_insurers,available_insurers)
-  available_plans <- c()
-  
-  # Last year's plans
-  if(t > 2014) {
-    lastyr_zip <- paste(zip3_choices[i,"zip3"],zip3_choices[i,"Region"],t-1,sep="_")
-    lastyr_region_year_plans <- which(plan_data$ENROLLMENT_YEAR == t-1 &
-                                        plan_data$region == zip3_choices[lastyr_zip,"Region"])
-    lastyr_available_products <- zipchoices[lastyr_zip,]
-    lastyr_available_products <- names(lastyr_available_products)[!is.na(lastyr_available_products)]
-    lastyr_available_insurers <- unique(product_definitions[lastyr_available_products,"insurer"])
-    lastyr_large_available_insurers <- intersect(large_insurers,lastyr_available_insurers)
-    lastyr_available_plans <- c()
-  }
-  
-  # Now get the specific plans available
-  
-  if ("Anthem" %in% available_insurers) {
-    if("Anthem_HMO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "HMO" &
-                                             plan_data$MSP == 0)))
-    }
-    if("Anthem_EPO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "EPO" &
-                                             plan_data$MSP == 0)))
-    }
-    if("Anthem_PPO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "PPO" &
-                                             plan_data$MSP == 0)))
-    }
-    if("Anthem_EPO_MSP" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "EPO" &
-                                             plan_data$MSP == 1)))
-    }
-    if("Anthem_PPO_MSP" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "PPO" &
-                                             plan_data$MSP == 1)))
-    }
-  } 
-  if ("Blue_Shield" %in% available_insurers) {
-    # could be HMO, EPO, PPO
-    if("Blue_Shield_HMO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Blue_Shield" & plan_data$PLAN_NETWORK_TYPE == "HMO" )))
-    }
-    if("Blue_Shield_EPO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Blue_Shield" & plan_data$PLAN_NETWORK_TYPE == "EPO" )))
-    }
-    if("Blue_Shield_PPO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Blue_Shield" & plan_data$PLAN_NETWORK_TYPE == "PPO" )))
-    }
-  } 
-  if ("Health_Net" %in% available_insurers) {
-    # could be HMO, HSP, EPO, PPO
-    if("Health_Net_HMO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "HMO")))
-    }
-    if("Health_Net_HSP" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "HSP")))
-    }
-    if("Health_Net_EPO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "EPO")))
-    }
-    if("Health_Net_PPO" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "PPO")))
-    }
-  }
-  if ("SHARP" %in% available_insurers) {
-    # could be network 1 or 2
-    if("Sharp1" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "SHARP" & plan_data$Network_num == 1 & 
-                                             !is.na(plan_data$Network_num))))
-    }
-    if("Sharp2" %in% available_products) {
-      available_plans <- c(available_plans,
-                           intersect(region_year_plans,
-                                     which(plan_data$Issuer_Name == "SHARP" & plan_data$Network_num == 2 & 
-                                             !is.na(plan_data$Network_num))))
-    }
-  }
-  if (any(single_product_insurers %in% available_insurers)) {
-    available_plans <- c(available_plans,
-                         intersect(region_year_plans,
-                                   which(plan_data$Issuer_Name %in% intersect(available_insurers,single_product_insurers))))
-  }
-  
-  households_to_update <- which(households$zip_region_year == i & !is.na(households$zip_region_year))
-  available_plan_names <- unique(as.character(plan_data[available_plans,"Plan_Name_Small"]))
-  choices[households_to_update,available_plan_names] <- 0
-  
-  if(t > 2014) {
-    if(length(available_products) > length(lastyr_available_products)) {
-      households[households_to_update,"change_in_products"] <- 1 # Net entry
-    } else if (length(available_products) < length(lastyr_available_products)) {
-      households[households_to_update,"change_in_products"] <- -1 # Net exit
-    }
-    
-    if(length(available_insurers) > length(lastyr_available_insurers)) {
-      households[households_to_update,"change_in_insurers"] <- 1 # Net entry
-    } else if (length(available_insurers) < length(lastyr_available_insurers)) {
-      households[households_to_update,"change_in_insurers"] <- -1 # Net exit
-    }
-    
-    if(length(large_available_insurers) > length(lastyr_large_available_insurers)) {
-      households[households_to_update,"change_in_large_insurers"] <- 1 # Net entry
-    } else if (length(large_available_insurers) < length(lastyr_large_available_insurers)) {
-      households[households_to_update,"change_in_large_insurers"] <- -1 # Net exit
-    }
-    
-    lastyr_large_available_insurers
-    
-    number_in_market <- sum(households[!is.na(households$plan_number_nocsr) & households$zip_region_year == i &
-                                         !is.na(households$zip_region_year),"weight"])
-    
-    if(number_in_market > 0) {
-      households[households_to_update,"market_turnover"] <- 
-        sum(households[is.na(households$previous_plan_number) & 
-                         !is.na(households$plan_number_nocsr) & households$zip_region_year == i &
-                         !is.na(households$zip_region_year),"weight"])/number_in_market
-    }	
-    
-  }
-  
-  if(t > 2014) {
-    if ("Anthem" %in% lastyr_available_insurers) {
-      if("Anthem_HMO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "HMO" &
-                                                      plan_data$MSP == 0)))
-      }
-      if("Anthem_EPO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "EPO" &
-                                                      plan_data$MSP == 0)))
-      }
-      if("Anthem_PPO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "PPO" &
-                                                      plan_data$MSP == 0)))
-      }
-      if("Anthem_EPO_MSP" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "EPO" &
-                                                      plan_data$MSP == 1)))
-      }
-      if("Anthem_PPO_MSP" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Anthem" & plan_data$PLAN_NETWORK_TYPE == "PPO" &
-                                                      plan_data$MSP == 1)))
-      }
-    } 
-    if ("Blue_Shield" %in% lastyr_available_insurers) {
-      # could be HMO, EPO, PPO
-      if("Blue_Shield_HMO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Blue_Shield" & plan_data$PLAN_NETWORK_TYPE == "HMO" )))
-      }
-      if("Blue_Shield_EPO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Blue_Shield" & plan_data$PLAN_NETWORK_TYPE == "EPO" )))
-      }
-      if("Blue_Shield_PPO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Blue_Shield" & plan_data$PLAN_NETWORK_TYPE == "PPO" )))
-      }
-    } 
-    if ("Health_Net" %in% lastyr_available_insurers) {
-      # could be HMO, HSP, EPO, PPO
-      if("Health_Net_HMO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "HMO")))
-      }
-      if("Health_Net_HSP" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "HSP")))
-      }
-      if("Health_Net_EPO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "EPO")))
-      }
-      if("Health_Net_PPO" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "Health_Net" & plan_data$PLAN_NETWORK_TYPE == "PPO")))
-      }
-    }
-    if ("SHARP" %in% lastyr_available_insurers) {
-      # could be network 1 or 2
-      if("Sharp1" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "SHARP" & plan_data$Network_num == 1 & 
-                                                      !is.na(plan_data$Network_num))))
-      }
-      if("Sharp2" %in% lastyr_available_products) {
-        lastyr_available_plans <- c(lastyr_available_plans,
-                                    intersect(lastyr_region_year_plans,
-                                              which(plan_data$Issuer_Name == "SHARP" & plan_data$Network_num == 2 & 
-                                                      !is.na(plan_data$Network_num))))
-      }
-    }
-    if (any(single_product_insurers %in% lastyr_available_insurers)) {
-      lastyr_available_plans <- c(lastyr_available_plans,
-                                  intersect(lastyr_region_year_plans,
-                                            which(plan_data$Issuer_Name %in% intersect(lastyr_available_insurers,single_product_insurers))))
-    }
-    
-    lastyr_available_plan_names <- unique(as.character(plan_data[lastyr_available_plans,"Plan_Name_Small"]))
-    new_plans <- setdiff(available_plan_names,lastyr_available_plan_names)
-    new_choices[households_to_update,new_plans] <- 1 
-    
-  }
-}
 
 # Restrictions on who can pick ACS plans
 # Must be subsidy eligible and have income below 250%
@@ -474,41 +203,6 @@ colnames(new_choices) <- c(colnames(new_choices)[1:(ncol(new_choices)-1)],"Unins
 gc()
 
 
-#write.csv(choices[,!colnames(choices) == "Uninsured"], file = "ca_choice_matrix_SEP012016.csv",row.names=FALSE)
-#rm(choices_julia)
-gc()
-
-##### Previous plan choices
-
-# Previous plan choice is already in household object
-# You need to be careful with CSR plans (shift between CSR plans shouldn't count as change
-
-households$previous_plan_number_small <- reference_numbers[households$previous_plan_number]
-
-
-previous_choices <- matrix(0,nrow(choices),ncol(choices),dimnames=list(rownames(choices),colnames(choices)))
-
-for(j in unique(households$previous_plan_number_small)) {
-  
-  # Get households that chose j in previous year
-  households_on_j <- which(households$previous_plan_number_small == j)
-  
-  # Get all plans that would be considered equivalent to j
-  j_plan_name <- colnames(choices)[j]
-  equivalent_plans <- unique(plan_data[plan_data$Plan_Name_Small_NOCSR == j_plan_name,"plan_number_small"])
-  
-  # Input previous choice (all equivalent plans get a 1, will eliminate extras in make.julia.V2.r)
-  previous_choices[households_on_j,equivalent_plans] <- 1
-}
-
-#previous_choices <- cbind(previous_choices,NA)
-#colnames(previous_choices)[ncol(previous_choices)] <- "Uninsured"
-
-##### Premium Object
-
-#choices <- get(load("ca_choice_matrix_FEB082016"))
-
-premiums <- choices
 
 # Choices for the exchange population for which we have 3-digit zip (plan has to be offered in year and zip)
 for(i in rownames(zip3_choices)) {
