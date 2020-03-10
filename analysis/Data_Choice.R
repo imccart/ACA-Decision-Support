@@ -1,7 +1,7 @@
 # Meta --------------------------------------------------------------------
 
 ## Date Created:  3/4/2020
-## Date Edited:   3/6/2020
+## Date Edited:   3/9/2020
 ## Description:   Create dataset for choice model
 ## Notes:         This file requires that we've already created the household data
 ##                and the plan data.
@@ -50,7 +50,8 @@ choice.set <- zip3.choices %>%
   select(-offered)
 
 
-choice.data <- hh.clean %>% select(household_id, year, zip3, FPL, subsidized_members) %>%
+choice.data <- hh.clean %>% select(household_id, year, zip3, FPL, subsidized_members,
+                                   AGE, cheapest_premium, subsidy, poverty_threshold) %>%
   full_join(choice.set, by=c("year"= "Year","zip3")) %>%
   mutate(Issuer_Name = case_when(
           str_detect(plan_name, "Anthem") ~ "Anthem",
@@ -85,12 +86,10 @@ afford.threshold <- tibble(
   year = c(2014, 2015, 2016, 2017, 2018, 2019)
 )
   
-  <- c(0.08,0.0805,0.0813,0.0816,0.0805,0.830)
-names(affordability_threshold) <- c("2014","2015","2016","2017","2018","2019")
-
-
 for (t in 2014:2019) {
 
+  a.thresh <- as.numeric(afford.threshold %>% filter(year==t) %>% select(cutoff))
+  
   ## Merge all possible choices
   full.choice.data <- choice.data %>% filter(year==t) %>%
     full_join(plan.data %>% mutate(Network_num=ifelse(is.na(Network_num),1,Network_num),
@@ -115,47 +114,20 @@ for (t in 2014:2019) {
   clean.choice.data <- clean.choice.data %>%
     group_by(household_id) %>%
     mutate(oldest_member=max(AGE)) %>%
-    ungroup()
+    ungroup() %>%
+    mutate(
+      eff_premium = case_when(
+        subsidized_members>0 ~ (cheapest_premium-subsidy)*12,
+        subsidized_members==0 ~ cheapest_premium*12),
+      threshold = a.thresh*FPL*poverty_threshold)
   
   clean.choice.data <- clean.choice.data %>%
-    filter(oldest_member<30 & !is.na(oldest_member))
+    filter((oldest_member<30 & 
+             !is.na(oldest_member) & 
+             eff_premium>threshold &
+             metal_level=="Minimum Coverage") | metal_level!="Minimum Coverage")
   
-    ## start back here...applying catastrophic coverage eligiblity
 }
-
-
-# Restrictions on who can pick catastrophic plans
-# Household all under age 30
-# No affordable offer
-
-catastrophic_plans <- as.character(unique(plan_data[plan_data$metal_level == "Minimum Coverage","Plan_Name_Small"]))
-
-
-# Affordable Offer
-
-
-thresholds <- rep(affordability_threshold["2014"],nrow(households))
-thresholds[which(households$year == 2015)] <- affordability_threshold["2015"]
-thresholds[which(households$year == 2016)] <- affordability_threshold["2016"]
-thresholds[which(households$year == 2017)] <- affordability_threshold["2017"]
-thresholds[which(households$year == 2018)] <- affordability_threshold["2018"]
-thresholds[which(households$year == 2019)] <- affordability_threshold["2019"]
-
-unaffordable_exchange_offer_households_subsidized <- 
-  which(((households$cheapest_premium - households$subsidy) * 12 > 
-           thresholds * households$FPL * households$poverty_threshold) &
-          households$subsidized_members > 0 & !households$flagged)
-unaffordable_exchange_offer_households_unsubsidized <- 
-  which((households$cheapest_premium * 12 > 
-           thresholds * households$FPL * households$poverty_threshold )&
-          households$subsidized_members == 0 & !households$flagged)
-
-
-catastrophic_eligibles <- union(catastrophic_eligibles,
-                                c(unaffordable_exchange_offer_households_subsidized,unaffordable_exchange_offer_households_unsubsidized))
-
-choices[setdiff(1:nrow(choices),catastrophic_eligibles),catastrophic_plans] <- NA
-new_choices[setdiff(1:nrow(new_choices),catastrophic_eligibles),catastrophic_plans] <- 0
 
 
 # Input choice
