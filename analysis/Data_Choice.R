@@ -80,6 +80,13 @@ choice.data <- hh.clean %>% select(household_id, year, zip3, FPL, subsidized_mem
            TRUE ~ 1
          ))
 
+afford.threshold <- tibble(
+  cutoff = c(0.08, 0.0805, 0.0813, 0.0816, 0.0805, 0.0830),
+  year = c(2014, 2015, 2016, 2017, 2018, 2019)
+)
+  
+  <- c(0.08,0.0805,0.0813,0.0816,0.0805,0.830)
+names(affordability_threshold) <- c("2014","2015","2016","2017","2018","2019")
 
 
 for (t in 2014:2019) {
@@ -93,7 +100,6 @@ for (t in 2014:2019) {
   
   ## Remove plans that are not available for specific households.
   ## 1. ACS eligible households not eligible for "unenhanced silver plans"
-  ## 2. Catastrophic plans only available for HH under age 30 without an affordable offer
   clean.choice.data <- full.choice.data %>%
     mutate(acs_eligible73 = ifelse(FPL>2 & FPL<=2.5 & subsidized_members>0,1,0),
            acs_eligible87 = ifelse(FPL>1.5 & FPL<=2 & subsidized_members>0,1,0),
@@ -101,10 +107,19 @@ for (t in 2014:2019) {
     mutate(silver_option = case_when(
       acs_eligible73==1 & metal_level=="Silver - Enhanced 73" ~ 1,
       acs_eligible87==1 & metal_level=="Silver - Enhanced 87" ~ 1,
-      acs_eligible94==1 & metal_level=="Silver - Enhanced 94" ~ 1
-    )) %>%
-    filter( (metal=="Silver" & silver_option==1) | metal!="Silver",
-            (oldest_member < 30 & !is.na(oldest_member)) )
+      acs_eligible94==1 & metal_level=="Silver - Enhanced 94" ~ 1)
+    ) %>%
+    filter( (metal=="Silver" & silver_option==1) | metal!="Silver")
+  
+  ## 2. Catastrophic plans only available for HH under age 30 without an affordable offer
+  clean.choice.data <- clean.choice.data %>%
+    group_by(household_id) %>%
+    mutate(oldest_member=max(AGE)) %>%
+    ungroup()
+  
+  clean.choice.data <- clean.choice.data %>%
+    filter(oldest_member<30 & !is.na(oldest_member))
+  
     ## start back here...applying catastrophic coverage eligiblity
 }
 
@@ -115,14 +130,9 @@ for (t in 2014:2019) {
 
 catastrophic_plans <- as.character(unique(plan_data[plan_data$metal_level == "Minimum Coverage","Plan_Name_Small"]))
 
-# Age	
-oldest_member <- by(data$AGE,data$household_year,max)
-catastrophic_eligibles <- which(oldest_member < 30 & !is.na(oldest_member))
 
 # Affordable Offer
 
-affordability_threshold <- c(0.08,0.0805,0.0813,0.0816,0.0805,0.830)
-names(affordability_threshold) <- c("2014","2015","2016","2017","2018","2019")
 
 thresholds <- rep(affordability_threshold["2014"],nrow(households))
 thresholds[which(households$year == 2015)] <- affordability_threshold["2015"]
