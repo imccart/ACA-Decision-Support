@@ -14,6 +14,10 @@
 hh.clean <- data.hh %>% filter(flagged==0)
 data.clean <- data %>% filter(flagged==0)
 
+## Oldest person per household
+max.age <- data.ind %>%
+  group_by(household_id, year) %>%
+  summarize(oldest_member=max(AGE))
 
 ## Add some variables
 hh.clean <- hh.clean %>%
@@ -23,79 +27,88 @@ hh.clean <- hh.clean %>%
     FPL > 2.50 & FPL <= 4 ~ "250to400",
     FPL > 4 ~ "400ormore")) %>%
   mutate(perc_18to34 = perc_18to25 + perc_26to34,
-         perc_35to54 = perc_35to44 + perc_45to54)
+         perc_35to54 = perc_35to44 + perc_45to54) %>%
+  left_join(max.age, by=c("household_id","year"))
 
+  
 
 ## Predict who left market
 hh.clean <- hh.clean %>%
   add_predictions(outside_logit, "pred_oom", type="response") %>%
   mutate(pred_oom = ifelse(is.na(plan_number_nocsr),pred_oom,NA),
          out_of_market = (pred_oom > mean(pred_oom, na.rm=TRUE))) %>%
-  filter(out_of_market == FALSE)
+  filter(out_of_market == FALSE | !is.na(plan_number_nocsr))
 hh.clean <- as_tibble(hh.clean)
   
 
 data.clean <- data.clean %>%
   left_join(hh.clean %>% select(household_id, year, out_of_market), 
             by=c("household_id","year")) %>%
-  filter(out_of_market == FALSE)
+  filter(out_of_market == FALSE | !is.na(plan_number_nocsr))
 data.clean <- as_tibble(data.clean)
 
 
 # Form choice sets --------------------------------------------------------
-
-choice.set <- zip3.choices %>%
-  pivot_longer(c(-Year, -zip3, -Region), names_to = "plan_name", values_to = "offered") %>%
-  filter(!is.na(offered)) %>%
-  select(-offered)
-
-
-choice.data <- hh.clean %>% select(household_id, year, zip3, FPL, subsidized_members,
-                                   AGE, cheapest_premium, subsidy, poverty_threshold) %>%
-  full_join(choice.set, by=c("year"= "Year","zip3")) %>%
-  mutate(Issuer_Name = case_when(
-          str_detect(plan_name, "Anthem") ~ "Anthem",
-          str_detect(plan_name, "Blue_Shield") ~ "Blue_Shield",
-          str_detect(plan_name, "Health_Net") ~ "Health_Net",
-          str_detect(plan_name, "Kaiser") ~ "Kaiser",
-          str_detect(plan_name, "Molina") ~ "Molina",
-          str_detect(plan_name, "Sharp") ~ "SHARP",
-          str_detect(plan_name, "Chinese") ~ "Chinese_Community",
-          str_detect(plan_name, "Contra") ~ "Contra_Costa",
-          str_detect(plan_name, "LA_Care") ~ "LA_Care",
-          str_detect(plan_name, "Oscar") ~ "Oscar",
-          str_detect(plan_name, "United") ~ "United",
-          str_detect(plan_name, "Valley") ~ "Valley",
-          str_detect(plan_name, "Western") ~ "Western"),
-         PLAN_NETWORK_TYPE = case_when(
-          str_detect(plan_name, "HMO") ~ "HMO",
-          str_detect(plan_name, "EPO") ~ "EPO",
-          str_detect(plan_name, "PPO") ~ "PPO",
-          str_detect(plan_name, "HSP") ~ "HSP"),
-         MSP = case_when(
-           str_detect(plan_name, "MSP") ~ 1,
-           TRUE ~ 0),
-         Network_num = case_when(
-           str_detect(plan_name, "Sharp1") ~ 1,
-           str_detect(plan_name, "Sharp2") ~ 2,
-           TRUE ~ 1
-         ))
-
 afford.threshold <- tibble(
   cutoff = c(0.08, 0.0805, 0.0813, 0.0816, 0.0805, 0.0830),
   year = c(2014, 2015, 2016, 2017, 2018, 2019)
 )
-  
-for (t in 2014:2019) {
 
+zip3 <- as_tibble(zip3.choices %>% distinct(zip3))
+
+for (t in 2014:2019) {
+  
   a.thresh <- as.numeric(afford.threshold %>% filter(year==t) %>% select(cutoff))
   
+  for (i in 1:nrow(zip3))
+  
+  z <- as.numeric(zip3[i,1])
+  
+  choice.set <- zip3.choices %>% filter(Year==t, zip3==z) %>%
+    pivot_longer(c(-zip3, -Region), names_to = "plan_name", values_to = "offered") %>%
+    filter(!is.na(offered)) %>%
+    select(-offered)
+
+
+  choice.data <- hh.clean %>% filter(year==t, zip3==z) %>%
+    select(household_id, year, zip3, FPL, subsidized_members,
+           oldest_member, cheapest_premium, subsidy, poverty_threshold) %>%
+    full_join(choice.set, by=c("zip3")) %>%
+    mutate(Issuer_Name = case_when(
+            str_detect(plan_name, "Anthem") ~ "Anthem",
+            str_detect(plan_name, "Blue_Shield") ~ "Blue_Shield",
+            str_detect(plan_name, "Health_Net") ~ "Health_Net",
+            str_detect(plan_name, "Kaiser") ~ "Kaiser",
+            str_detect(plan_name, "Molina") ~ "Molina",
+            str_detect(plan_name, "Sharp") ~ "SHARP",
+            str_detect(plan_name, "Chinese") ~ "Chinese_Community",
+            str_detect(plan_name, "Contra") ~ "Contra_Costa",
+            str_detect(plan_name, "LA_Care") ~ "LA_Care",
+            str_detect(plan_name, "Oscar") ~ "Oscar",
+            str_detect(plan_name, "United") ~ "United",
+            str_detect(plan_name, "Valley") ~ "Valley",
+            str_detect(plan_name, "Western") ~ "Western"),
+          PLAN_NETWORK_TYPE = case_when(
+            str_detect(plan_name, "HMO") ~ "HMO",
+            str_detect(plan_name, "EPO") ~ "EPO",
+            str_detect(plan_name, "PPO") ~ "PPO",
+            str_detect(plan_name, "HSP") ~ "HSP"),
+          MSP = case_when(
+            str_detect(plan_name, "MSP") ~ 1,
+            TRUE ~ 0),
+          Network_num = case_when(
+            str_detect(plan_name, "Sharp1") ~ 1,
+            str_detect(plan_name, "Sharp2") ~ 2,
+            TRUE ~ 1
+          ))
+
   ## Merge all possible choices
-  full.choice.data <- choice.data %>% filter(year==t) %>%
+  full.choice.data <- choice.data %>%
     full_join(plan.data %>% mutate(Network_num=ifelse(is.na(Network_num),1,Network_num),
                                    PLAN_NETWORK_TYPE=as.character(PLAN_NETWORK_TYPE)) %>%
                 filter(ENROLLMENT_YEAR==t), 
               by=c("Issuer_Name","PLAN_NETWORK_TYPE","Network_num","MSP","Region"="region"))
+  
   
   ## Remove plans that are not available for specific households.
   ## 1. ACS eligible households not eligible for "unenhanced silver plans"
@@ -103,18 +116,13 @@ for (t in 2014:2019) {
     mutate(acs_eligible73 = ifelse(FPL>2 & FPL<=2.5 & subsidized_members>0,1,0),
            acs_eligible87 = ifelse(FPL>1.5 & FPL<=2 & subsidized_members>0,1,0),
            acs_eligible94 = ifelse(FPL<=1.5 & subsidized_members>0,1,0)) %>%
-    mutate(silver_option = case_when(
-      acs_eligible73==1 & metal_level=="Silver - Enhanced 73" ~ 1,
-      acs_eligible87==1 & metal_level=="Silver - Enhanced 87" ~ 1,
-      acs_eligible94==1 & metal_level=="Silver - Enhanced 94" ~ 1)
-    ) %>%
-    filter( (metal=="Silver" & silver_option==1) | metal!="Silver")
+    filter( (metal_level=="Silver - Enhanced 73" & acs_eligible73==1) |
+            (metal_level=="Silver - Enhanced 87" & acs_eligible87==1) |
+            (metal_level=="Silver - Enhanced 94" & acs_eligible94==1) |
+            metal!="Silver" | metal_level=="Silver")
   
   ## 2. Catastrophic plans only available for HH under age 30 without an affordable offer
   clean.choice.data <- clean.choice.data %>%
-    group_by(household_id) %>%
-    mutate(oldest_member=max(AGE)) %>%
-    ungroup() %>%
     mutate(
       eff_premium = case_when(
         subsidized_members>0 ~ (cheapest_premium-subsidy)*12,
@@ -122,10 +130,8 @@ for (t in 2014:2019) {
       threshold = a.thresh*FPL*poverty_threshold)
   
   clean.choice.data <- clean.choice.data %>%
-    filter((oldest_member<30 & 
-             !is.na(oldest_member) & 
-             eff_premium>threshold &
-             metal_level=="Minimum Coverage") | metal_level!="Minimum Coverage")
+    filter((oldest_member<30 &  !is.na(oldest_member) & eff_premium>threshold & metal_level=="Minimum Coverage") | 
+             metal_level!="Minimum Coverage")
   
 }
 
