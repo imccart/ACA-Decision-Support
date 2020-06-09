@@ -1,0 +1,61 @@
+---
+title: "Decision Assistance and Insurer Steering in Health Insurance"
+author: Ian McCarthy & Evan Saltzman
+date: June 2020
+geometry: "left=2cm,right=2cm,top=1cm,bottom=2cm"
+fontsize: 11pt
+subparagraph: yes
+header-includes:
+   - \usepackage{setspace}
+   - \singlespacing
+   - \usepackage{titlesec}
+   - \titlespacing{\section}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+   - \titlespacing{\subsection}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+   - \titlespacing{\subsubsection}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+output: 
+  pdf_document2:
+    keep_tex: TRUE
+    toc: FALSE
+    number_sections: FALSE
+bibliography: 'D:/CloudStation/Professional/Bibliography/BibTeX_Library.bib'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stargazer, knitr, kableExtra,
+               lfe)
+```
+
+```{r, include=FALSE}
+load("data/R_workspace.Rdata")
+```
+### Background:
+Health insurance markets are unique in many respects, not least of which is the increasing complexity of choosing an optimal health insurance plan. Such complexity has been well-documented in studies of health insurance choice in the Medicare Advantage market [@abaluck2011; @ketcham2012; @gruber2017], among others. One way to reduce the burden of this complexity is to provide professional decision support through private insurance agents or public assistance programs, both of which are available in the California health insurance exchanges created under the Affordable Care Act (ACA). The presence of private insurance brokers also introduces the potential for insurers to steer patients to insurance products indirectly through the brokers. In this paper, we examine the role of decision assistance on health insurance plan choice, the effects of commissions on insurer steering, and the broad implications of decision assistance for consumer welfare.
+
+
+### Data:
+Our final dataset consists of `r format(tot.enroll, big.mark=",")` household/year observations from the California health insurance exhanges from `r first.year` to `r last.year`. Our data include a variety of household characteristics, plan choices and plan characteristics, and information on the type of decision assistance used by the enrollee (if any). From these data, we can identify each household's set of possible health insurance plans, and we employ premium and cost sharing subsidy formulas to calculate health insurance costs for each possible plan for each household.
+
+
+### Demand estimation:
+We model health insurance purchasing with a nested logit discrete choice model, as in @saltzman2019, and we derive estimates of the causal effect of decision assistnce by embedding this discrete choice model into a standard potential outcomes framework. This analysis proceeds in three steps: 1) we estimate utility parameters on the subset of individuals without decision assistance; 2) we incorporate these parameters into the closed-form nested logit choice probabilities to estimate choices for the subset of "treated" individuals (i.e., those with some form of decision assistance); and 3) we take the difference between observed and predicted values to form our estimate of the average treatment effect on the treated. Standard errors are bootstrapped and clustered at the year/region level.
+
+Our nested logit demand estimation reveals economically large and statistically significant effects of decision assistance on plan choice. For example, we estimate that individuals are `r round(as.numeric(metal.final[5,6]),2)*100`% more likely to select a silver plan when using some form of decision assistance. Since silver plans are the dominant plan for many choice sets, this finding suggests that decision assistance may improve plan choice.
+
+
+### Dominated choices:
+As a complementary empirical analysis, we identify specific instances in which the observed plan choice is dominated by some other plan in an individual's choice set, and we estimate the effects of decision assistance on the probability of making such a choice. For example, Gold and Platinum tier plans are dominated for any household that is eligible for cost-sharing subsidies and with incomes below 150% of the federal poverty level. We estimate the effect of decision assistance on dominated choices with a linear probability model, allowing for year, insurer, and region fixed effects. Analogous to our nested logit analysis, these results suggest that individuals with decision assistance are `r abs(round(reg1$coeff[1],4))*100` percentage points less likely to make a dominated choice. On a base of `r round(mean.dom.choice,3)*100`%, this reflects a `r abs(round(reg1$coeff[1]/mean.dom.choice,2))*100`% decrease in the probability of making a dominated choice. 
+
+
+### Steering and welfare:
+We then supplement our nested logit demand analysis with data on commission payments to insurance brokers, and we incorporate a suppyl-side model of insurer commissions. Our strutural framework allows us to examine welfare implications of decision assistance and steering. Within this framework, we study several counterfactuals designed to approxmiate a variety of policy proposals, including flat commissions, banning of private insurance brokers in favor of public assistance only, and outright removal of all forms of decision assitance (e.g., defunding decision assistance entirely). Preliminary results suggest large welfare gains from removal of commission payments or restrictions to a flat commission schedule.
+
+
+### Discussion:
+Our results provide strong evidence that decision assistance has a significant and economically meaningful effect on health insurance plan choice. Decision assistance in general tends to improve consumer welfare, increasing the probability that enrollees select a silver plan and dramatically decreasing the probability of making a dominated choice. Gains to consumer welfare may be offset somewhat by insurer steering.
+
+In addition to continued structural work on commissions and steering, future work will exploit the Trump administration's removal of cost-sharing subisidies from the exchanges in 2018 and the subsequent response from insurers to increase premiums on their silver plans ("silver loading"). This response significantly changed the prevalence of dominated choices in each household's choice set, and in this way, the removal of the cost-sharing subsidies offers an exogenous change to the set of dominated plans available to each household. 
+
+
+# References

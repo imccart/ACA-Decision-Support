@@ -7,12 +7,13 @@
 
 # Clean Household Data ---------------------------------------------------
 
+
 ## Plan characteristics
 data.hh <- households %>% 
   separate(zip_region_year, c(NA,"region",NA), sep="_") %>%
   mutate(region = as.integer(region)) %>%
   left_join( (plan.data %>% 
-                select(plan_name=Plan_Name, region, 
+                select(plan_name=Plan_Name2, region, 
                        year=ENROLLMENT_YEAR, 
                        plan_network_type=PLAN_NETWORK_TYPE,
                        metal, 

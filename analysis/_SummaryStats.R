@@ -1,32 +1,8 @@
 # Meta --------------------------------------------------------------------
 
 ## Date Created:  10/11/2019
-## Date Edited:   3/4/2020
-## Description:   Analysis file for project
-
-
-# Analytic Datasets -----------------------------------------------------------
-final.data <- data.hh %>%
-  mutate(channel = as.factor(channel),
-         new_enrollee = is.na(previous_plan_number),
-         any_assist = (channel=="Insurance Agent" | channel=="Other Assistance"),
-         assist_agent = (channel=="Insurance Agent"),
-         assist_other = (channel=="Other Assistance"),
-         low_income = (FPL<1.5),
-         hh_single = (household_size==1),
-         hmo_ppo = (plan_network_type %in% c("HMO","PPO")),
-         bad_obs = (new_enrollee==0 & year==2014),
-         insurer = replace(insurer, 
-                           insurer %in% c("Chinese_Community","LA_Care","Western","Contra_Costa","SHARP"),
-                           "Other")) %>%
-  filter( flagged==0 & !is.na(plan_number_nocsr) & bad_obs==0 & FPL<2.0)%>%
-  select(lang_english, lang_spanish, lang_other,
-         perc_0to17, perc_18to25, perc_26to34, perc_35to44, perc_45to54,
-         perc_male, perc_asian, perc_black, perc_hispanic, perc_other, 
-         FPL, low_income, household_size, hh_single, SEP, new_enrollee, 
-         insurer, hmo_ppo, metal,
-         channel, any_assist, assist_agent, assist_other, dominated_choice, 
-         region, rating_area, year, household_id)
+## Date Edited:   6/5/2020
+## Description:   Basic summary stats
 
 
 # Summary Statistics ------------------------------------------------------

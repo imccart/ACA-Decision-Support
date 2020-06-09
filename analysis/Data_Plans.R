@@ -19,7 +19,11 @@ plan.data <- plan.data %>%
       Issuer_Name == "LA Care" ~ "LA_Care",
       Issuer_Name == "UnitedHealthcare" ~ "United",
       Issuer_Name == "Western Health" ~ "Western",
-      Issuer_Name == "Sharp" ~ "SHARP"
+      Issuer_Name == "Sharp" ~ "SHARP",
+      Issuer_Name == "Kaiser" ~ "Kaiser",
+      Issuer_Name == "Oscar" ~ "Oscar",
+      Issuer_Name == "Molina" ~ "Molina",
+      Issuer_Name == "Valley" ~ "Valley"
     )
   )
 
