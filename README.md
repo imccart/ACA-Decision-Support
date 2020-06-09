@@ -1,4 +1,4 @@
-# Decision Assitance and Health Insurance Choice
+# Decision Assitance and Insurer Steering in Health Insurance
 
 This repository provides the code files to replicate our paper, *Decision Assistance and Insurer Steering in Health Insurance*. Below is the list of files and a brief description.
 
