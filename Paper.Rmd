@@ -36,6 +36,7 @@ Health insurance markets are unique in many respects, not least of which is the 
 
 # Background and Motivation
 
+Discussion of poor decision making in health insurance and role of experts.
 
 
 # Data
