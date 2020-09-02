@@ -1,6 +1,6 @@
 # Decision Assitance and Insurer Steering in Health Insurance
 
-This repository provides the code files to replicate our paper, *Decision Assistance and Insurer Steering in Health Insurance*. Below is the list of files and a brief description.
+This repository provides the code files to replicate our paper, *Decision Assistance and Insurer Steering in Health Insurance*. Below is the list of files and brief descriptions.
 
 ## Data
 The data underlying this research were purchased from the State of California. Although we are not at liberty to share the data, we have made available all of our underlying code. Note that this is a living document, and additional scripts will be made available as necessary to facilitate a more complete replication of our results from the raw data.
