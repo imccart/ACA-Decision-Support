@@ -1,0 +1,161 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  12pt,
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Decision Support and Health Insurance Choice},
+  pdfauthor={Ian McCarthy \& Evan Saltzman},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage{setspace}
+\doublespacing
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+\titlespacing{\subsection}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+\titlespacing{\subsubsection}{0pt}{12pt plus 2pt minus 1pt}{0pt plus 1pt minus 1pt}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newenvironment{cslreferences}%
+  {\setlength{\parindent}{0pt}%
+  \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces}%
+  {\par}
+
+\title{Decision Support and Health Insurance Choice}
+\author{Ian McCarthy \& Evan Saltzman}
+\date{April 30, 2020}
+
+\begin{document}
+\maketitle
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Health insurance markets are unique in many respects, not least of which is the increasing complexity of choosing an optimal health insurance plan. Such complexity has been well-documented in studies of health insurance choice in the Medicare Advantage market (Abaluck and Gruber 2011; Ketcham et al. 2012; Gruber 2017). One way to reduce the burden of this complexity is to provide professional decision support through private insurance agents or public assistance programs, both of which are available in the California health insurance exchanges created under the Affordable Care Act (ACA). In this paper, we examine the role of this decision assistance on health insurance plan choice and its implications for consumer welfare.
+
+\hypertarget{background-and-motivation}{%
+\section{Background and Motivation}\label{background-and-motivation}}
+
+\hypertarget{data}{%
+\section{Data}\label{data}}
+
+Our final dataset consists of 3,200,080 household/year observations from the California health insurance exhanges from 2014 to 2019. Our data include a variety of household characteristics, plan choices and plan characteristics, and information on the type of decision assistance used by the enrollee (if any). From these data, we can identify each household's set of possible health insurance plans, and we employ premium and cost sharing subsidy formulas to calculate health insurance costs for each possible plan for each household.
+
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+Our overarching goal is to estimate the effect of decision assistance on health insurance decisions; however, there are perhaps many ways of measuring ``health insurance decisions''. One approach is to estimate demand for health insurance in a traditional discrete choice framework. This would allow us to quantify individuals' willingness to pay for decision assistance as well as the effect of decision assistance on choice probabilities. Another approach is to focus specifically on ``dominated choices'', which are relatively clearly defined and observable in our empirical context. This latter approach lacks the richness of the discrete choice demand framework but benefits from a focus on a specific outcome of obvious policy and welfare relevance. We consider both approaches in our analysis, as detailed in the remainder of this section.
+
+\hypertarget{discrete-choice-framework}{%
+\subsection{Discrete Choice Framework}\label{discrete-choice-framework}}
+
+We model health insurance purchasing with a nested logit discrete choice model, as in Saltzman (2019), and we derive estimates of the effect of decision assistnce by embedding this discrete choice model into a standard potential outcomes framework.
+
+For our discrete choice model, we assume that household \(i\) chooses the plan \(j\) that maximizes their utility,
+\begin{equation}
+u_{ij} = \alpha_{i}p_{ij} + \beta x_{j} + \gamma d_{i} + \xi_{j} + \varepsilon_{ij}, \label{eq:utility}
+\end{equation}
+where \(p_{ij}\) denotes the premium for plan \(j\), \(x_{j}\) denotes a vector of product characteristics, \(d_{i}\) denotes a vector of household characteristics, \(\xi_{j}\) captures unobserved product characteristics, and \(\varepsilon_{ij}\) is an error term assumed to follow a type I extreme value distribution. We allow for heterogenities in price elasticities across households by parameterizing \(\alpha_{i}\) in Equation \eqref{eq:utility}, \[\alpha_{i} = \alpha + \theta d_{i}.\] In our estimation, this amounts to including a full set of interactions between \(d_{i}\) and \(p_{ij}\).
+
+\hypertarget{dominated-choices}{%
+\subsection{Dominated Choices}\label{dominated-choices}}
+
+As a complementary empirical analysis, we identify specific instances in which the observed plan choice is dominated by some other plan in an individual's choice set, and we estimate the effects of decision assistance on the probability of making such a choice. For example, Gold and Platinum tier plans are dominated for any household that is eligible for cost-sharing subsidies and with incomes below 150\% of the federal poverty level. We estimate the effect of decision assistance on dominated choices with a linear probability model, allowing for year, insurer, and region fixed effects.
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+Our nested logit models establish strong evidence that decision assistance matters for insurance choice. Turning specifically to dominated choices, our baseline results suggest that individuals with decision assistance are 1.16 percentage points less likely to make a dominated choice. On a base of 2.8\%, this reflects a 41\% decrease in the probability of making a dominated choice.
+
+We also find evidence fo heterogeneities in the effects of different forms of decision assistance. In particular, we find that individuals using publicly provided decision assistance are 0.91 percentage points less likely to select a dominated plan, while individuals using a private insurance agent are 1.26 percentage points less likely to select a dominated plan.
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+Our current results provide strong evidence that decision assistance has a significant and economically meaningful effect on health insurance plan choice. In terms of dominated choices, our early results suggest that this change in decision-making is welfare improving, and we continue to explore other measures of choice dominance to further confirm this result.
+
+In future work, our identification strategy will exploit the Trump administration's removal of cost-sharing subisidies from the exchanges in 2018 and the subsequent response from insurers to increase premiums on their silver plans (``silver loading''). This response significantly changed the prevalence of dominated choices in each household's choice set, and in this way, the removal of the cost-sharing subsidies offers an exogenous change to the set of dominated plans available to each household.
+
+We are also extending our analysis of the differential effects between public decision support versus assistance from private insurance agents/brokers. This analysis will determine whether insurance brokers are more likely to steer patients into plans offered by the sponsoring insurer.
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\begin{cslreferences}
+\leavevmode\hypertarget{ref-abaluck2011}{}%
+Abaluck, Jason, and Jonathan Gruber. 2011. ``Heterogeneity in Choice Inconsistencies Among the Elderly: Evidence from Prescription Drug Plan Choice.'' \emph{American Economic Review} 101 (3): 377--81.
+
+\leavevmode\hypertarget{ref-gruber2017}{}%
+Gruber, Jonathan. 2017. ``Delivering Public Health Insurance Through Private Plan Choice in the United States.'' \emph{Journal of Economic Perspectives} 31 (4): 3--22.
+
+\leavevmode\hypertarget{ref-ketcham2012}{}%
+Ketcham, Jonathan D, Claudio Lucarelli, Eugenio J Miravete, and M Christopher Roebuck. 2012. ``Sinking, Swimming, or Learning to Swim in Medicare Part d.'' \emph{American Economic Review} 102 (6): 2639--73.
+
+\leavevmode\hypertarget{ref-saltzman2019}{}%
+Saltzman, Evan. 2019. ``Demand for Health Insurance: Evidence from the California and Washington Aca Exchanges.'' \emph{Journal of Health Economics} 63: 197--222.
+\end{cslreferences}
+
+\end{document}
