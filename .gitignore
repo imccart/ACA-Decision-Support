@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+_Abstract_SHESG_202006_files/*
+data/*
+paths.R
+analysis/evan_code/*
+data-code/evan_code/*
