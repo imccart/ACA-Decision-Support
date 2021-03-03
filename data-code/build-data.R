@@ -4,22 +4,18 @@
 ## Title:         Decision Assistance and Health Insurance Choice
 ## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/28/2019
-## Date Edited:   2/3/2021
-## Description:   This file renders/runs all relevant R code for the project
+## Date Edited:   3/2/2021
+## Description:   This file builds the final datasets for analysis
 
 
 # Preliminaries -----------------------------------------------------------
 if (!require("pacman")) renv::install('pacman')
-pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stargazer, knitr, kableExtra,
-               lfe, modelr, mlogit, bookdown, future, parallel, nnet, mnlogit, mixl,
-               JuliaCall, future.apply, gtsummary, emo, twilio, SAScii, data.table)
-
+pacman::p_load(tidyverse, dplyr, lubridate, SAScii, data.table)
 source('paths.R')
-source(paste0(common,"/common_functions.R"))
-julia_setup(JULIA_HOME=jsetup)
-
 
 # Import and clean data ---------------------------------------------------
+source('data-code/process.SIPP.R')
+rm(list=ls())
 source('data-code/impute.SIPP.R')
 source('data-code/process.COVCAL.data.R')
 
