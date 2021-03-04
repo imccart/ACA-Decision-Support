@@ -8,7 +8,6 @@ poverty_guidelines <- read.csv("data/poverty_guidelines.csv",row.names=1) # Pove
 contribution_percentages <- read.csv("data/contribution_percentages.csv",row.names = 1) # ACA contribution percentages
 rating_areas <- read.csv("data/rating_areas.csv",row.names = 1) # California county-rating area mapping
 
-
 set.seed(6)
 
 #### Data Cleanup

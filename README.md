@@ -17,24 +17,36 @@ The following is a list of the core raw data files used throughout our analysis:
 8. ACS and SIPP: Several datasets used to collect and compile information from the ACS and SIPP. All data files are located in the `/data/ACS-SIPP/` subfolder.
 
 
-In addition,
-10. Public Use Microdata Areas: Data downloaded directly from Census Bureau and saved as *PUMAs.csv*
-11. Small Area Health Insurance Estimates: Data for 2014 downloaded from Census Bureau and saved as *sahie_2014.csv*
-12. *counties_2014* through *counties_2019*
-13. Rate filing: Raw data downloaded from [CMS website](https://www.cms.gov/CCIIO/Resources/Data-Resources/ratereview) and merged into *2014-2020.RData* file. 
-14. Medical loss ratio: Raw data downloaded from [CMS website](https://www.cms.gov/CCIIO/Resources/Data-Resources/mlr). Data are stored in separate folders, "2014 MLR Data", "2015 MLR Data", etc.
-15. RA/RI: PDFs downloaded from CMS website. Manually extracted relevant information into *ra_reins.csv* file.
+
+In addition, we use the following supplemental datasets in forming our final individual, household, and plan-level files:
+
+9. Public Use Microdata Areas: Data downloaded directly from Census Bureau and saved as *PUMAs.csv*
+10. Small Area Health Insurance Estimates: Data for 2014 downloaded from Census Bureau and saved as *sahie_2014.csv*
+11. *counties_2014* through *counties_2019*
+
+
+Finally, our supply-side analysis further employs the following datasets:
+
+12. Rate filing: Raw data downloaded from [CMS website](https://www.cms.gov/CCIIO/Resources/Data-Resources/ratereview) and merged into *2014-2020.RData* file. 
+13. Medical loss ratio: Raw data downloaded from [CMS website](https://www.cms.gov/CCIIO/Resources/Data-Resources/mlr). Data are stored in separate folders, "2014 MLR Data", "2015 MLR Data", etc.
+14. RA/RI: PDFs downloaded from CMS website. Manually extracted relevant information into *ra_reins.csv* file.
 
 
 ## Data Management and Cleaning
-The following code files build the final analytic datasets used for both our demand and supply-side analysis. All of the raw data files are listed above, and any data files created from the following code files are saved into a `/data/final/` subdirectory.
+The following code files build the final analytic datasets used for both our demand and supply-side analysis. All of the raw data files are listed above, and any data files created from the following code files are saved into a `/data/final/` subdirectory. In general, we split the data wrangling into two: 1) data for demand estimation; and 2) data for supply estimation. [Build Final Data](data-code/build-data.R) is an *R* script that sets initial paths, installs necessary packages, and calls all of the relevant code files. Details of demand and supply-side data management are described below:
 
-1. [Process SIPP](data-code/process.SIPP.R): This process some data based on the SIPP. It creates two final datasets, an *acs_immigration.csv* dataset and an *acs_emp_offer.csv* dataset. These files are inputs into the [final data code](data-code/process.final.data.R).
+### Demand-side data
+1. [Process SIPP](data-code/process.SIPP.R): This processes the SIPP data. It creates two final datasets, an *acs_immigration.csv* dataset and an *acs_emp_offer.csv* dataset. These files are inputs into the [final data code](data-code/process.final.data.R).
 2. [Impute SIPP](data-code/impute.SIPP.R): This generates a prediction model for the outside option, *sipp-logit*.
 3. [Process COVCAL data](data-code/process.COVCAL.data.R): This is the primary code file to import and clean the data. This code takes as inputs the [raw data](#raw) objects [1]-[7], and creates two primary data objects: 1) a dataset on enrollments and plan information at the individual level, *enroll_temp.Rdata*; and 2) a dataset on enrollments and plan information at the household level, *household_temp.Rdata*.
-4. [Process final data](data-code/process.final.data.R): This file incorporates ACS data (item [8] in the [raw data](#raw)), along with data on PUMAs, SAHIE, and California county information into the temporary enrollment and household objects from the prior step. This file ultimately creates three final data objects: 1) an enrollment dataset, *enroll_data.Rdata*; 2) a household-level dataset, *household_data.Rdata*; and 3) a plan-level dataset, *plan_data.Rdata*.
+4. [Process demand data](data-code/process.demand.data.R): This file incorporates ACS data (item [8] in the [raw data](#raw)), along with data on PUMAs, SAHIE, and California county information into the temporary enrollment and household objects from the prior step. This file ultimately creates three final data objects: 1) an enrollment dataset, *enroll_data.Rdata*; 2) a household-level dataset, *household_data.Rdata*; and 3) a plan-level dataset, *plan_data.Rdata*.
 
-[Build Final Data](data-code/build-data.R) is an *R* script that sets initial paths, installs necessary packages, and calls all of the above code files. 
+
+### Supply-side data
+1. [Process rate data](data-code/process.rate.data.R): This collects the rate filing data 
+2. [Process MLR data](data-code/process.MLR.data.nav.R): 
+
+
 
 
 
@@ -51,7 +63,7 @@ We split the analysis into three sections. First, we
 
 
 
-2. [Process MLR data](data-code/process.MLR.data.nav.R): 
+
 
 
 ## Papers
