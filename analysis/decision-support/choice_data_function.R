@@ -1,8 +1,8 @@
 # Meta --------------------------------------------------------------------
 
 ## Date Created:  5/12/2020
-## Date Edited:   5/25/2020
-## Description:   Function to create choice-level datasets and save subset for future use
+## Date Edited:   3/15/2021
+## Description:   Function to create choice-level dataset for given year and area
 
 
 # Estimation function -----------------------------------------------------
@@ -16,8 +16,8 @@ choice.data.fnc <- function(t, r) {
     Issuer_Name="Outside_Option"
   )
   
-  choice.set <- plan.data %>% filter(ENROLLMENT_YEAR==t, region==r) %>%
-    select(plan_name=Plan_Name2, Issuer_Name, region, PLAN_NETWORK_TYPE, metal_level, metal, 
+  choice.set <- plan_data %>% filter(Year==t, region==r) %>%
+    select(plan_name=Plan_Name2, Issuer_Name=Insurer, region, PLAN_NETWORK_TYPE, metal_level=Metal_Level, metal, 
            Premium, MSP, HSA) %>%
     group_by(plan_name, region) %>%
     summarize(Issuer_Name=first(Issuer_Name),
@@ -142,7 +142,7 @@ choice.data.fnc <- function(t, r) {
            platinum, silver, gold, bronze, AV, plan_name) %>%
     left_join(hh.clean %>% select(household_id, year, hh_region=region, tax_unit_type, hh_size=household_size,
                                   starts_with('lang_'), starts_with('perc_'), starts_with('exempt'),
-                                  dominated_choice, service_channel, channel),
+                                  dominated_choice, navigator, broker, agent, channel),
               by=c("household_id", "year", "hh_region")) %>%
     mutate(metal=ifelse(is.na(metal),"Other",metal),
            plan_choice = case_when(
@@ -223,8 +223,8 @@ choice.data.fnc <- function(t, r) {
   sample.hh.oos <- sample_frac(unique.hh.oos, size=0.2, replace=FALSE)
   
     
-  ## Final data to Julia
-  julia.data <- untreated.dat %>%
+  ## Final data
+  est.data <- untreated.dat %>%
     inner_join(sample.hh, by=c("household_number")) %>%          
     select(plan_name, household_number, choice, premium,
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan,
@@ -232,7 +232,7 @@ choice.data.fnc <- function(t, r) {
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
            Anthem, Blue_Shield, Kaiser, Health_Net)
   
-  julia.oos <- treated.dat %>%
+  oos.data <- treated.dat %>%
     inner_join(sample.hh.oos, by=c("household_number")) %>%              
     select(plan_name, household_number, choice, premium,
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan, 
@@ -240,5 +240,5 @@ choice.data.fnc <- function(t, r) {
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
            Anthem, Blue_Shield, Kaiser, Health_Net)
   
-  return(list("julia.data"=julia.data, "julia.oos"=julia.oos))
+  return(list("est.data"=est.data, "oos.data"=oos.data))
 }

@@ -4,7 +4,7 @@
 ## Title:         Decision Assistance and Health Insurance Choice
 ## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/28/2019
-## Date Edited:   3/2/2021
+## Date Edited:   3/8/2021
 ## Description:   This file builds the final datasets for analysis
 
 
@@ -15,9 +15,12 @@ source('paths.R')
 
 # Import and clean data ---------------------------------------------------
 source('data-code/process.SIPP.R')
-rm(list=ls())
 source('data-code/impute.SIPP.R')
 source('data-code/process.COVCAL.data.R')
+
+
+# Build demand-side data --------------------------------------------------
+source('data-code/prepare.demand.data.R')
 
 
 # Call analysis and set workspace for knitr -------------------------------

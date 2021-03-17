@@ -9,8 +9,7 @@
 
 ##### Load Data
 	
-	setwd("C:/Users/esaltzm/OneDrive - Emory University/Google Drive/Emory/Research/Navigators/Data")
-	mlr_data <- read.csv("mlr_data.csv",header=TRUE,row.names=1)
+	mlr_data <- read.csv("data/final/mlr_data.csv",header=TRUE,row.names=1)
 	#rate_data <- read.csv("ca_risk_adj_results.csv")
 	rate_data <- read.csv("convergence_analysis_updated.csv",row.names=1)
 	
@@ -898,7 +897,7 @@
 	plans_pmt[plans_pmt$Metal_Level == "Platinum","AV"] <- 0.9
 	
 	# Add proj_name and rate_name
-	rsdata <- read.csv("moments_data_V11_nav.csv",header=TRUE,row.names=1)
+	rsdata <- read.csv("data/final/moments_data.csv",header=TRUE,row.names=1)
 	plans_pmt$rate_name <- plans_pmt$pmt_name	
 	plans_pmt[!plans_pmt$rate_name %in% rsdata$pmt_name,"rate_name"]	<- 
 		paste(plans_pmt[!plans_pmt$rate_name %in% rsdata$pmt_name,"plan_name"],plans_pmt[!plans_pmt$rate_name %in% rsdata$pmt_name,"year"],0,sep="")

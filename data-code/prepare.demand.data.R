@@ -118,7 +118,7 @@ gc()
 ##### Load All Other Data 
 acs_immigration <- get(load("data/final/acs_immigration"))
 acs_emp_offer <- get(load("data/final/acs_emp_offer"))
-ca_pumas <- read.csv("data/pumas.csv",header=TRUE) # PUMA definitions for California
+ca_pumas <- read.csv("data/PUMAs.csv",header=TRUE) # PUMA definitions for California
 sahie <- read.csv("data/sahie_2014.csv",header=TRUE) # 2014 CA SAHIE data
 contribution_percentages <- read.csv("data/contribution_percentages.csv",row.names = 1) # ACA contribution percentages
 poverty_guidelines <- read.csv("data/poverty_guidelines.csv",row.names=1) # Poverty guidelines

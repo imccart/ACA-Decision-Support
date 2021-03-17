@@ -48,8 +48,8 @@
 	
 	# Save output
 	param_output = DataFrame();
-	param_output[:Variable] = cat(dims=1,all_covariates,"lambda");
-	param_output[:Coef] = min_beta;
+	param_output[!,:Variable] = cat(all_covariates,"lambda"; dims=1);
+	param_output[!,:Coef] = min_beta;
 		
 		
 		
