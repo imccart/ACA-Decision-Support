@@ -121,6 +121,7 @@ hh.full <- hh.full %>%
            broker==1 | agent==1 ~ "Agent",
            TRUE ~ "Unassisted"
          ),
+         assisted=ifelse(channel=="Assisted",1,0),
          channel_detail=as.factor(channel_detail),
          any_agent=ifelse(broker==1 | agent==1, 1, 0),
          new_enrollee=ifelse(is.na(previous_plan_offered),1,0))

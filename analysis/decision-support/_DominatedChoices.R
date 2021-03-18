@@ -7,14 +7,14 @@
 
 # Initial Regressions -----------------------------------------------------
 
-mod1 <- feols(dominated_choice ~ channel + english + spanish +
+mod1 <- feols(dominated_choice ~ assisted + english + spanish +
                 FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +
                 perc_45to54 + perc_male + perc_asian + perc_black + perc_hispanic +
                 perc_other + household_size + new_enrollee 
               | region + year + insurer, cluster="region",
               data=hh.full)
 
-mod2 <- feols(dominated_choice ~ channel + english + spanish +
+mod2 <- feols(dominated_choice ~ assisted + english + spanish +
                FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +
                perc_45to54 + perc_male + perc_asian + perc_black + perc_hispanic +
                perc_other + household_size + SEP + new_enrollee 
@@ -22,14 +22,14 @@ mod2 <- feols(dominated_choice ~ channel + english + spanish +
      data=hh.full)
 
 
-mod3 <- feols(dominated_choice ~ channel + english + spanish +
+mod3 <- feols(dominated_choice ~ assisted + english + spanish +
                 FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +
                 perc_45to54 + perc_male + perc_asian + perc_black + perc_hispanic +
                 perc_other + household_size + new_enrollee 
              | household_id + year + insurer, cluster="household_id", 
              data=hh.full)
 
-mod4 <- feols(dominated_choice ~ channel + english + spanish +
+mod4 <- feols(dominated_choice ~ assisted + english + spanish +
                 FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +
                 perc_45to54 + perc_male + perc_asian + perc_black + perc_hispanic +
                 perc_other + household_size + SEP + new_enrollee 
@@ -37,14 +37,14 @@ mod4 <- feols(dominated_choice ~ channel + english + spanish +
               data=hh.full)
 
 
-mod5 <- feols(dominated_choice ~ channel + english + spanish +
+mod5 <- feols(dominated_choice ~ assisted + english + spanish +
                 FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +
                 perc_45to54 + perc_male + perc_asian + perc_black + perc_hispanic +
                 perc_other + household_size
               | region + year + insurer, cluster="region",
               data=hh.clean)
 
-mod6 <- feols(dominated_choice ~ channel + english + spanish +
+mod6 <- feols(dominated_choice ~ assisted + english + spanish +
                 FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +
                 perc_45to54 + perc_male + perc_asian + perc_black + perc_hispanic +
                 perc_other + household_size + SEP 
@@ -58,10 +58,14 @@ dom.regs <- list("Region FE/Cluster"=mod1,
                  "Region FE/Cluster \nNew Enrollees Only"=mod5, 
                  "Region FE/Cluster \nwith SEP \nNew Enrollees Only"=mod6)
 
-modelplot(dom.regs, coef_map= c("channelUnassisted"="No Assistance"), facet=TRUE, size=.2) + 
-  theme(strip.text.y=element_blank())
+modelplot(dom.regs, coef_map= c("assisted"="Assistance"), facet=TRUE, size=.2) + 
+  theme(strip.text.y=element_blank()) +
+  scale_x_continuous(limits=c(-0.020,0.001)) +
+  ggsave("figures/dominated_choice_regression.png")
+  
+  
 modelsummary(list("1"=mod1, "2"=mod2, "3"=mod3, "4"=mod4, "5"=mod5, "6"=mod6), 
-             coef_rename=c("channelUnassisted"="No Assistance",
+             coef_rename=c("assisted"="Assistance",
                            "english"="English Speaking HH",
                            "spanish"="Spanish Speacking HH",
                            "FPL" = "Poverty Line",
