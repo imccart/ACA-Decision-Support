@@ -82,11 +82,13 @@ max.boot <- 200
                          future.seed=TRUE)
 #sim.bs <- lapply(1:max.boot, bootsrp)
 
-bs.coef <- sim.bs[[1]]$coef
-bs.pred <- sim.bs[[1]]$pred
+bs.coef <- sim.bs[[1]]$coef %>%
+  mutate(boot=1)
+bs.pred <- sim.bs[[1]]$pred %>%
+  mutate(boot=1)
 for (i in 2:max.boot) {
-  bs.coef <- bind_rows(bs.coef, sim.bs[[i]]$coef)
-  bs.pred <- bind_rows(bs.pred, sim.bs[[i]]$pred)  
+  bs.coef <- bind_rows(bs.coef, sim.bs[[i]]$coef %>% mutate(boot=i))
+  bs.pred <- bind_rows(bs.pred, sim.bs[[i]]$pred %>% mutate(boot=i))  
 }
 
 

@@ -136,5 +136,7 @@ hh.clean <- hh.full %>%
 
 source('analysis/decision-support/_SummaryStats.R')
 source('analysis/decision-support/_DominatedChoices.R')
+
+rm("hh.full","households","max.age","language","hh.language","panel.length")
 source('analysis/decision-support/_ChoiceModel.R')
 source('analysis/decision-support/_ChoiceSummary.R')
