@@ -4,7 +4,7 @@
 ## Title:         Decision Assistance and Health Insurance Choice
 ## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/28/2019
-## Date Edited:   3/16/2021
+## Date Edited:   3/17/2021
 ## Description:   This file calls all scripts necessary for estimating the effect of decision assistance on 
 ##                health insurance choice.
 
