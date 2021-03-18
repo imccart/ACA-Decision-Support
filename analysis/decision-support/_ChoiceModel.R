@@ -80,9 +80,9 @@ max.boot <- 200
                          future.globals=future.tracking, 
                          future.packages=c("dplyr","mclogit","modelr"),
                          future.seed=TRUE)
-#sim.bs <- lapply(1:max.boot, bootsrp)
 
-bs.coef <- sim.bs[[1]]$coef %>%
+
+ bs.coef <- sim.bs[[1]]$coef %>%
   mutate(boot=1)
 bs.pred <- sim.bs[[1]]$pred %>%
   mutate(boot=1)
