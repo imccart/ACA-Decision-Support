@@ -1,0 +1,123 @@
+---
+title: "Insurance choice, decision assistance, and insurer steering"
+subtitle: "Ian McCarthy & Evan Saltzman"
+author: Emory University, Lunch and Learn
+date: March 30, 2021 #"`r format(Sys.time(), '%d %B %Y')`"
+header-includes: 
+  - \usepackage{graphicx}
+  - \usepackage{amsmath}
+output:
+#  html_document: default (toggle on for "simplified" view)
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts, custom.css] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+      beforeInit: "macros.js"
+#knit: pagedown::chrome_print
+---
+
+<!-- Adjust some CSS code for font size, maintain R code font size -->
+<style type="text/css">
+.remark-slide-content {
+    font-size: 30px;
+    padding: 1em 2em 1em 2em;    
+}
+.remark-code, .remark-inline-code { 
+    font-size: 20px;
+}
+</style>
+
+
+<!-- Set R options for how code chunks are displayed and load packages -->
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+options(dplyr.summarise.inform = FALSE)
+library(knitr)
+opts_chunk$set(
+  fig.align="center",  
+  fig.height=3, #fig.width=6,
+  # out.width="748px", #out.length="520.75px",
+  dpi=300, #fig.path='Figs/',
+  cache=T#, echo=F, warning=F, message=F
+  )
+
+knitr::opts_hooks$set(fig.callout = function(options) {
+  if(options$fig.callout) {
+    options$echo = FALSE
+  }
+  options
+})
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes,
+               scales, gganimate, gapminder, gifski, png, tufte, plotly, OECD,
+               ggrepel, xaringanExtra)
+```
+
+
+```{r xaringan-scribble, echo=FALSE}
+xaringanExtra::use_scribble()
+xaringanExtra::use_panelset()
+```
+
+# Insurance Choice is Confusing
+
+.center[
+  ![](slate-2017.png)
+]
+    
+.footnote[
+  [Slate, 2017](https://slate.com/business/2017/08/americans-are-overpaying-for-insurance-because-obamacare-is-confusing.html)
+]
+  
+---
+count: false
+
+# Insurance Choice is Confusing
+.center[
+  ![](health-affairs-2017b.png)
+]
+    
+.footnote[
+  [Health Affairs, January, 2017](https://www.healthaffairs.org/doi/10.1377/hlthaff.2016.0472)
+]
+
+
+---
+count: false
+
+# Insurance Choice is Confusing
+.center[
+  ![](health-affairs-2017.png)
+]
+    
+.footnote[
+  [Health Affairs, August, 2017](https://www.healthaffairs.org/doi/full/10.1377/hlthaff.2017.0085)
+]
+
+    
+---
+count: false
+
+# Insurance Choice is Confusing
+
+  - "More than half of all uninsured (56%) say they are likely to go to the marketplace to find a health plan in the future. But there are knowledge gaps."
+  - "Six in 10 are confused about or have not heard of the tax credit, and more than 7 in 10 want one-on-one help understanding their insurance options"
+
+
+.footnote[
+  [Robert Wood Johnson Foundation, **Understanding the Uninsured Now**, 2015](https://www.rwjf.org/en/library/research/2015/06/understanding-the-uninsured-now.html)
+]
+
+---
+# Choice of plans has big consequences
+
+
+
+
+
+
