@@ -44,6 +44,57 @@ ggplot(hh.full) +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys") + ggsave("figures/metal_stack_all.png")
 
+ggplot(hh.full) +
+  geom_bar(mapping=aes(x=channel,fill=metal),
+           position="fill", color="black", size=.1) +
+  labs(
+    x=" ",
+    y="Relative Frequency",
+    title="Metal Tier by Assistance"
+  ) + theme_bw() +
+  theme(legend.title=element_blank()) +
+  scale_fill_brewer(palette="Greys") + ggsave("figures/metal_stack_any.png")
+
+
+## figure of assistance and insurer
+hh.full %>% mutate(insurer = case_when(
+  insurer=="Blue_Shield" ~ "BCBS",
+  insurer=="Health_Net" ~ "HealthNet",
+  insurer=="Anthem" ~ "Anthem",
+  insurer %in% c("Chinese_Community", "Contra_Costa", "Molina", "LA_Care","Oscar","SHARP","United","Valley","Western") ~ "Other",
+  insurer=="Kaiser" ~ "Kaiser",
+  TRUE ~ "Missing")) %>%
+  ggplot() + 
+  geom_bar(mapping=aes(x=channel_detail,fill=insurer),
+           position="fill", color="black", size=.1) +
+  labs(
+    x="Type of Assistance",
+    y="Relative Frequency",
+    title="Selected Insurer"
+  ) + theme_bw() +
+  theme(legend.title=element_blank()) +
+  scale_fill_brewer(palette="Greys") + ggsave("figures/insurer_stack_all.png")
+
+
+hh.full %>% mutate(insurer = case_when(
+  insurer=="Blue_Shield" ~ "BCBS",
+  insurer=="Health_Net" ~ "HealthNet",
+  insurer=="Anthem" ~ "Anthem",
+  insurer %in% c("Chinese_Community", "Contra_Costa", "Molina", "LA_Care","Oscar","SHARP","United","Valley","Western") ~ "Other",
+  insurer=="Kaiser" ~ "Kaiser",
+  TRUE ~ "Missing")) %>%
+  ggplot() + 
+  geom_bar(mapping=aes(x=channel,fill=insurer),
+           position="fill", color="black", size=.1) +
+  labs(
+    x=" ",
+    y="Relative Frequency",
+    title="Selected Insurer"
+  ) + theme_bw() +
+  theme(legend.title=element_blank()) +
+  scale_fill_brewer(palette="Greys") + ggsave("figures/insurer_stack_any.png")
+
+
 ## data on enrollees per year
 enrollee.count.all <- hh.full %>% count(year) %>%
   rename(enroll_count=n) %>%
