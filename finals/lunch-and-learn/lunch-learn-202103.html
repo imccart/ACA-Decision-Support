@@ -3,12 +3,15 @@
   <head>
     <title>Insurance choice, decision assistance, and insurer steering</title>
     <meta charset="utf-8" />
-    <meta name="author" content="Emory University" />
+    <meta name="author" content="Emory University, Lunch and Learn" />
+    <meta name="date" content="2021-03-30" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
-    <link href="libs/panelset/panelset.css" rel="stylesheet" />
-    <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#E68080"],"pen_size":3,"eraser_size":30}) })</script>
     <link rel="stylesheet" href="custom.css" type="text/css" />
   </head>
   <body>
@@ -17,8 +20,8 @@ class: center, middle, inverse, title-slide
 
 # Insurance choice, decision assistance, and insurer steering
 ## Ian McCarthy &amp; Evan Saltzman
-### Emory University
-### Lunch and Learn, March 30, 2021
+### Emory University, Lunch and Learn
+### March 30, 2021
 
 ---
 
@@ -41,7 +44,14 @@ class: center, middle, inverse, title-slide
 
 
 
-# Insurance Choice is Confusing
+# Two motivating facts:
+
+1. Insurance choice is confusing, particularly on the ACA exchanges
+
+2. Size of the market introduces decision problems on a massive scale
+
+---
+# 1. Insurance choice is confusing
 
 .center[
   ![](slate-2017.png)
@@ -54,7 +64,7 @@ class: center, middle, inverse, title-slide
 ---
 count: false
 
-# Insurance Choice is Confusing
+# 1. Insurance choice is confusing
 .center[
   ![](health-affairs-2017b.png)
 ]
@@ -67,7 +77,8 @@ count: false
 ---
 count: false
 
-# Insurance Choice is Confusing
+# 1. Insurance choice is confusing
+
 .center[
   ![](health-affairs-2017.png)
 ]
@@ -80,7 +91,7 @@ count: false
 ---
 count: false
 
-# Insurance Choice is Confusing
+# 1. Insurance choice is confusing
 
   - "More than half of all uninsured (56%) say they are likely to go to the marketplace to find a health plan in the future. But there are knowledge gaps."
   - "Six in 10 are confused about or have not heard of the tax credit, and more than 7 in 10 want one-on-one help understanding their insurance options"
@@ -91,7 +102,69 @@ count: false
 ]
 
 ---
+# 2. Potential scale
+
+- 12.7 million enrollees on exchanges in 2016
+- Down to 11.4 million in 2020
+- Over 27 million remain uninsured
+
+---
+count: false
+
+# 2. Potential scale
+
+.pull-left[
+Exchanges relatively large, but...
+
+- Large number of people still uninsured
+- Many eligible for some type of subsidy on exchanges
+]
+
+.pull-right[
+  ![:scale 150%](kff-uninsured.png)
+]
+    
+    
+    
+.footnote[
+  [Kaiser Family Foundation, November, 2020](https://www.kff.org/policy-watch/millions-of-uninsured-americans-are-eligible-for-free-aca-health-insurance/)
+]
+
+
+---
 # This paper
+
+Lots of people participating in a very complicated decision. With this in mind, we ask the following questions:
+
+1. Does some form of decision assistance "help" in plan selection?
+2. Does the type of assistance matter (private versus public)?
+3. Do insurers use brokers/agents to steer people to different plans?
+4. What are the welfare effects of any such steering?
+
+
+---
+# Outline of talk
+
+1. [Background on the ACA](#background)
+2. [Data](#data)
+3. [Dominated choices](#dominated)
+4. [Effects of decision assistance](#decision-assist)
+5. [Insurer steering](#steering)
+
+
+---
+class: inverse, center, middle
+name: background
+
+# Background on the ACA exchanges
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+
+---
+class: clear, center, middle
+
+![:scale 80%](https://media.giphy.com/media/Awb1k8lX8a3Re/giphy.gif)
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
