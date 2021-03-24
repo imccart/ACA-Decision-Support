@@ -1,0 +1,67 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx,amssymb,amsmath,setspace,comment,verbatim,titling,pgf,lscape,color}
+\usepackage[left=2cm,right=2cm,top=2.5cm,bottom=2cm]{geometry}
+\usepackage[round]{natbib}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{bbm}
+\usepackage{marginnote}
+\usepackage[justification=centering]{caption}
+%%\usepackage{breqn}
+\newcommand{\pderiv}[2]{\frac{\partial#1}{\partial#2}}
+%\usepackage{siunitx}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\hypersetup{colorlinks,%
+						citecolor=black,%
+						filecolor=black,%
+						linkcolor=black,%
+						urlcolor=blue,%
+						}
+\setstretch{1.5}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\setlength{\droptitle}{-50pt}
+
+\title{Decision Assistance and Insurer Steering in Health Insurance}
+\author{Ian McCarthy \& Evan Saltzman}
+\date{March 2021}
+
+\begin{document}
+\maketitle
+
+\subsubsection{Background:}
+In some markets such as real estate, used automobiles, and insurance, consumers face significant cognitive challenges that may require the assistance of an agent or intermediary. The influence of agents on consumer decisions, and the firm's influence on the behaviors of its agents, have important implications for the efficiency of these markets. In this paper, we study the welfare effects of decision assistance and firm steering in health insurance. The complexity of choosing an optimal health insurance plan has been well-documented in studies of health insurance choice in the Medicare Advantage market, including \cite{abaluck2011}, \cite{ketcham2012}, and \cite{gruber2017}, among others. We expand on this literature by analyzing the effect of private insurance agents and publicly-financed navigators on health insurance plan choices. We then examine the extent to which insurance firms steer consumer choices through agent commissions. We quantify the welfare impact of decision assistance and simulate the effects of alternative commission policies.
+
+
+\subsubsection{Data:}
+We use consumer-level enrollment data from the California Affordable Care Act (ACA) exchange. Our final data consist of 8.3 million household-year observations from 2014 to 2019. The data include a variety of household characteristics, plan choices and plan characteristics, and information on the type of decision assistance used by the enrollee (if any). Using these data, we can precisely identify each household's choice set, the premium paid for each plan in the choice set, and any premium and cost sharing subsidies for which the household is eligible.
+
+\subsubsection{Effects of decision assistance:}
+Our initial analysis of the effects of decision assistance exploits the presence of ``dominated plans'' in the ACA exchanges. Specifically, consumers with incomes below 250\% of the federal povery level (FPL) can receive cost sharing subsidies if they purchase a silver tier plan. The subsidies have the effect of increasing the actuarial value of the silver plan. For consumers with incomes below 150\% of FPL, the actuarial value of the silver plan exceeds that of more expensive plans from the gold and platinum tiers, and hence gold and platinum plans are dominated for this income group. As a summary statistic, we estimate the relationship between decision assistance and dominated choices with a linear probability model, allowing for year, insurer, and region fixed effects. These results show that new enrollees using some form of decision assistance (agents or navigators) are approximately 0.9 percentage points less likely to make a dominated choice. On a base of 3.2\%, this reflects a 28\% decrease in the probability of making a dominated choice.
+
+We then establish a causal relationship between decision assistance and insurance choice by embedding a nested logit discrete choice model into a standard potential outcomes framework. This analysis proceeds in three steps: 1) we estimate utility parameters on the subset of individuals without decision assistance; 2) we incorporate these parameters into the closed-form nested logit choice probabilities to estimate choices for the subset of ``treated'' individuals (i.e., those with some form of decision assistance); and 3) we take the difference between observed and predicted values to form our estimate of the average treatment effect on the treated. Standard errors are bootstrapped and clustered at the year/region level. 
+
+Consistent with our dominated choice analysis, we find that decision assistance has a statistically significant and economically meaningful effect on plan choice. We estimate that individuals are 50\% more likely to select a silver plan when using some form of decision assistance. The majority of this increase comes from a reduction in the selection of bronze plans, such that those using some decision assistance appear to be substituting out of bronze plans and into silver plans. We also find that individuals with decision assistance are about 12\% more likely to select a Kaiser plan and about 8\% more likely to select a Blue Cross Blue Shield plan. This is offset by over a 20\% decrease in the probability that an individual is uninsured, and about a 5\% reduction in the probability of selecting one of the many smaller health insurers in the exchanges.
+
+Collectively, these results suggest that decision assistance can help consumers avoid making poor health insurance decisions. People with some assistance are much more likely to select a silver tier plan, and they are much less likely to remain uninsured. This is consistent with other documented patterns among enrollees on the exchanges, in which a large share of individuals either choose a dominated plan or remain uninsured despite having affordable plans available to them. 
+
+\subsubsection{Insurer steering:}
+To examine the welfare effects of decision assistance and the presence of steering, we estimate a structural model of the California ACA exchange. Our model endogenizes consumer plan choices, premiums, and commissions, which allows us to simulate the welfare implications of decision assistance and firm steering. We study several counterfactuals designed to approximate a variety of policy proposals, including uniform commissions across firms, the banning of private insurance agents in favor of publicly-funded assistance, and the removal of all forms of decision assistance (e.g., defunding decision assistance entirely).
+
+Preliminary results suggest that firms have considerable ability to steer consumers' decisions using agent commissions. For small firms, a \$1 increase in the plan commission has the same effect as a \$2 decrease in the plan premium on the probability of the plan being chosen. The effect is more pronounced for larger insurers, where a \$1 increase in the plan commission is equivalent to a \$3.50 decrease in the plan premium. 
+
+
+\subsubsection{Discussion:}
+Our results provide strong evidence that decision assistance has a significant and economically meaningful effect on health insurance plan choice. Decision assistance in general tends to improve plan choices, increasing the probability that enrollees select a silver plan and decreasing the probability of making a dominated choice. Gains to social welfare are potentially offset by insurer steering, which introduces the potential for alternative agent compensation schemes to improve welfare in this market.
+
+
+\pagebreak
+\bibliographystyle{authordate1}
+\bibliography{BibTeX_Library}
+
+\clearpage
+\newpage
+
+
+
+\end{document}
