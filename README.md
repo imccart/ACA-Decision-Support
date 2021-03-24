@@ -72,16 +72,15 @@ We consider reduced-form evidence for the role of decision support in the [Domin
 [Choice Model](analysis/_ChoiceModel.R) runs the nested logit discrete choice model for estimating the causal effect of decision assistance on insurance choice. This file also calls several underlying scripts, including [choice_data_function](analysis/choice_data_function.R) to create the choice-level data, [choice_est_function](analysis/choice_est_function.R) to estimate the choice model, and [choice_est_bs_function](analysis/choice_est_bs_function.R) to bootstrap the standard errors/confidence intervals of the choice model. Note that the choice model is estimated in *Julia*, and the code uses the package *JuliaCall* to communicate between *RStudio* and *Julia*. Relevant functions for Julia are [J_demand_est](analysis/J_demand_est.jl) to estimate the main choice model, [J_demand_bs](analysis/J_demand_bs.jl) for boostrapping, and [J_demand_fnc](analysis/J_demand_fnc.jl) for other functions called by the former Julia files.
 
 ### Structural analysis of steering
-    - Structural estimation (files pending)
+  - Structural estimation (files pending)
 
 
 
 
 ## Papers and presentations
-
-The [RunRender](RunRender.R) script creates the main "deliverables" associated with the project, including all abstracts, presentations, the main paper, and any supplemental material. All documents are fully reproducible in that all numbers, tables, figures, etc. are created directly from the [analysis](#analysis) scripts and simply called within the markdown document. Similarly, the [analysis](#analysis) scripts each save modified (smaller) versions of the workspaces that are subsequently used in rendering the TeX/PDF/HTML files. Note that the *knitr::render()* function in *R* strongly prefers everything in the render specification to be in the current directory. This is why the TeX/PDFs are saved in the active directory. The individual markdown files for each final deliverable are listed below:<br>
-    - [ASHEcon Abstract, 2020](_Abstract_ASHEcon_201910.Rmd) This is an *R Markdown* document that creates the TeX and PDF files for our submission to the 2020 ASHEcon conference. The abstract was accepted for presentation, although ultimately not presented due to COVID-19.
-    - [SHESG Abstract, 2020](_Abstract_SHESG_202006.Rmd) This is an *R Markdown* document that creates the TeX and PDF files for our submission to the 2020 SHESG conference. 
+Below are links to different abstracts, presentations, and the main paper. 
+    - [Emory Brown Bag Abstract, 2021](finals/) This is a *Tex* file to generate the abstract for an internal presentation as part of our departmental brown bag series. 
+    - [Emory Brown Bag Presentation, 2021](finals/lunch-and-learn/lunch-learn-202103.html) This is a brown bag presentation from March 2021.
 
  
 
