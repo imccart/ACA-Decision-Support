@@ -47,7 +47,7 @@ class: center, middle, inverse, title-slide
 # Some decisions are hard
 
 .center[
-&lt;iframe width="800" height="500" src="https://www.youtube.com/embed/oWXNf3JVWpI?start=146" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;iframe width="800" height="500" src="https://www.youtube.com/embed/oWXNf3JVWpI?start=146&amp;end=271" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
 ]
 
 ---
@@ -150,6 +150,8 @@ Lots of people participating in a very complicated decision. With this in mind, 
 
 
 ---
+class: inverse
+
 # Outline of talk
 
 1. [Background on the ACA](#background)
@@ -212,6 +214,74 @@ Insurers limited in ability to adjust premiums
 .pull-right[
   ![:scale 100%](CA_Rating_Regions2.jpg)
 ]
+
+---
+# Popularity of the exchanges
+
+.center[
+![:scale 85%](aca-enrollment-graph.png)
+]
+
+
+
+---
+class: inverse, center, middle
+name: data
+
+# Data
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+
+---
+class: inverse, center, middle
+name: dominated
+
+# Analysis of dominated choices
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+
+---
+class: inverse, center, middle
+name: decision-assist
+
+# Effect of decision assistance
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+---
+# Consumer choice model
+
+Household i's Utility for Plan j&lt;br&gt;
+
+`\(\begin{eqnarray}U_{ij} &amp;=&amp; \alpha_i \underbrace{p_{ij}}_{cons.\\prem.} \hspace{0.075in} + \hspace{0.075in} \underbrace{x'_{j}}_{obs.\\prod.} \beta \hspace{0.075in} + \hspace{0.075in} \underbrace{d'_{i}}_{dem.\\char.} \varphi \hspace{0.075in} + \hspace{0.075in} \underbrace{\xi_{j}}_{unobs.\\prod.} \hspace{0.075in} + \hspace{0.075in} \underbrace{\epsilon_{ij}}_{error} \nonumber\end{eqnarray}\)`
+	
+where&lt;br&gt;
+
+`\(\begin{eqnarray*}\alpha_i &amp;=&amp; \alpha + d'_i \gamma \end{eqnarray*}\)` 
+
+`\(\begin{eqnarray*}\underbrace{p_{ij}}_{cons.\\prem.} &amp;=&amp; \underbrace{r_{i}}_{rating\\ fact.} \underbrace{p_j}_{full\\prem.} \hspace{0.075in} - \hspace{0.075in} \underbrace{\max\{p_b - \mathrm{cap}_i,0\}}_{subsidy} \end{eqnarray*}\)`
+
+---
+count: false
+
+# Consumer choice model
+
+Utility for Outside Option (Uninsured)&lt;br&gt;
+
+`\(\begin{eqnarray*} U_{i0} &amp;=&amp; \alpha_i \underbrace{\rho_i}_{\textrm{penalty}} \hspace{0.075in} + \hspace{0.075in}  \underbrace{\epsilon_{i0}}_{error} \end{eqnarray*}\)`
+
+
+
+
+---
+class: inverse, center, middle
+name: steering
+
+# Analysis of insurer steering
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
