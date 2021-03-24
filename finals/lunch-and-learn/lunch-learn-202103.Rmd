@@ -63,9 +63,11 @@ pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes,
 xaringanExtra::use_scribble(rgb(0.9, 0.5, 0.5))
 ```
 
-# Decisions are hard
+# Some decisions are hard
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/oWXNf3JVWpI?start=146" frameborder="0" allowfullscreen></iframe>
+.center[
+<iframe width="800" height="600" src="https://www.youtube.com/embed/oWXNf3JVWpI?start=146" frameborder="0" allowfullscreen></iframe>
+]
 
 ---
 # In the health insurance setting...
