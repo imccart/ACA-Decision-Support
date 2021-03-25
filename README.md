@@ -25,7 +25,7 @@ In addition, we use the following **supplemental datasets** in forming our final
 11. *counties_2014* through *counties_2019*
 
 
-Finally, our **supply-side analysis** further employs the following datasets:
+Finally, our **steering analysis** further employs the following datasets:
 
 12. Rate filing: Raw data downloaded from [CMS website](https://www.cms.gov/CCIIO/Resources/Data-Resources/ratereview) and merged into *2014-2020.RData* file. 
 13. Medical loss ratio: Raw data downloaded from [CMS website](https://www.cms.gov/CCIIO/Resources/Data-Resources/mlr). Data are stored in separate folders, "2014 MLR Data", "2015 MLR Data", etc.
@@ -57,7 +57,7 @@ The following code files build the final analytic datasets used for our analysis
 We split the analysis into two overarching sections: 1) a standalone analysis focusing on estimating the causal effect of decision support on plan choice; and 2) a standalone structural analysis of insurer steering, which incorporates both the decision assistance data objects and the steering data objects. We briefly discuss the relevant code files for each analysis below.
 
 
-### Causal effect of decision support
+### Effect of decision support
 Our initial analysis of decision support proceeds in three steps:
 
 1. **Summarize**<br>
@@ -69,7 +69,7 @@ We summarize our results with two individual code files:<br>
 We consider reduced-form evidence for the role of decision support in the [Dominated Choices](analysis/_DominatedChoices.R) script. This code file identifies the dominated choices and runs an initial regression analysis of dominated choices as a function of decision assistance
 
 3. **Choice model**<br>
-[Choice Model](analysis/_ChoiceModel.R) runs the nested logit discrete choice model for estimating the causal effect of decision assistance on insurance choice. This file also calls several underlying scripts, including [choice_data_function](analysis/choice_data_function.R) to create the choice-level data, [choice_est_function](analysis/choice_est_function.R) to estimate the choice model, and [choice_est_bs_function](analysis/choice_est_bs_function.R) to bootstrap the standard errors/confidence intervals of the choice model. Note that the choice model is estimated in *Julia*, and the code uses the package *JuliaCall* to communicate between *RStudio* and *Julia*. Relevant functions for Julia are [J_demand_est](analysis/J_demand_est.jl) to estimate the main choice model, [J_demand_bs](analysis/J_demand_bs.jl) for boostrapping, and [J_demand_fnc](analysis/J_demand_fnc.jl) for other functions called by the former Julia files.
+[Choice Model](analysis/_ChoiceModel.R) runs the nested logit discrete choice model for estimating the causal effect of decision assistance on insurance choice. This file also calls several underlying scripts, including [choice_data_function](analysis/choice_data_function.R) to create the choice-level data, [choice_est_function](analysis/choice_est_function.R) to estimate the choice model, and [choice_est_bs_function](analysis/choice_est_bs_function.R) to bootstrap the standard errors/confidence intervals of the choice model.
 
 ### Structural analysis of steering
   - Structural estimation (files pending)
@@ -79,7 +79,9 @@ We consider reduced-form evidence for the role of decision support in the [Domin
 
 ## Papers and presentations
 Below are links to different abstracts, presentations, and the main paper. 
+
     - [Emory Brown Bag Abstract, 2021](finals/abstract-emory-lunchlearn-202103.tex) This is a *Tex* file to generate the abstract for an internal presentation as part of our departmental brown bag series. 
+    
     - [Emory Brown Bag Presentation, 2021](finals/lunch-and-learn/lunch-learn-202103.html) This is a brown bag presentation from March 2021.
 
  
