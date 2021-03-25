@@ -38,8 +38,7 @@ ggplot(hh.full) +
            position="fill", color="black", size=.1) +
   labs(
     x="Type of Assistance",
-    y="Relative Frequency",
-    title="Metal Tier by Type of Assistance"
+    y="Relative Frequency"
   ) + theme_bw() +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys") + ggsave("figures/metal_stack_all.png")
@@ -49,8 +48,7 @@ ggplot(hh.full) +
            position="fill", color="black", size=.1) +
   labs(
     x=" ",
-    y="Relative Frequency",
-    title="Metal Tier by Assistance"
+    y="Relative Frequency"
   ) + theme_bw() +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys") + ggsave("figures/metal_stack_any.png")
@@ -69,8 +67,7 @@ hh.full %>% mutate(insurer = case_when(
            position="fill", color="black", size=.1) +
   labs(
     x="Type of Assistance",
-    y="Relative Frequency",
-    title="Selected Insurer"
+    y="Relative Frequency"
   ) + theme_bw() +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys") + ggsave("figures/insurer_stack_all.png")
@@ -88,8 +85,7 @@ hh.full %>% mutate(insurer = case_when(
            position="fill", color="black", size=.1) +
   labs(
     x=" ",
-    y="Relative Frequency",
-    title="Selected Insurer"
+    y="Relative Frequency"
   ) + theme_bw() +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys") + ggsave("figures/insurer_stack_any.png")

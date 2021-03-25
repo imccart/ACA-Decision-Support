@@ -100,8 +100,9 @@ count: false
 
 # 1. Insurance choice is confusing
 
-  - "More than half of all uninsured (56%) say they are likely to go to the marketplace to find a health plan in the future. But there are knowledge gaps."
-  - "Six in 10 are confused about or have not heard of the tax credit, and more than 7 in 10 want one-on-one help understanding their insurance options"
+- "More than half of all uninsured (56%) say they are likely to go to the marketplace to find a health plan in the future. But there are knowledge gaps."
+  
+- "Six in 10 are confused about or have not heard of the tax credit, and more than 7 in 10 want one-on-one help understanding their insurance options"
 
 
 .footnote[
@@ -112,7 +113,9 @@ count: false
 # 2. Potential scale
 
 - 12.7 million enrollees on exchanges in 2016
+
 - Down to 11.4 million in 2020
+
 - Over 27 million remain uninsured
 
 ---
@@ -124,6 +127,7 @@ count: false
 Exchanges relatively large, but...
 
 - Large number of people still uninsured
+
 - Many eligible for some type of subsidy on exchanges
 ]
 
@@ -144,9 +148,10 @@ Exchanges relatively large, but...
 Lots of people participating in a very complicated decision. With this in mind, we ask the following questions:
 
 1. Does some form of decision assistance "help" in plan selection?
-2. Does the type of assistance matter (private versus public)?
-3. Do insurers use brokers/agents to steer people to different plans?
-4. What are the welfare effects of any such steering?
+
+2. Do insurers use brokers/agents to steer people to different plans?
+
+3. What are the welfare effects of any such steering?
 
 
 ---
@@ -234,6 +239,63 @@ name: data
 
 
 ---
+# Sources
+
+Main enrollment come from Covered California under FOIA. This includes:
+- Individual demographics and income
+- Plan purchases
+- Information on type of assistance (if any)
+
+Supplemental data include:
+- ACS and SIPP for predicting uninsured
+- ACA program data (contribution percentages, rating areas, etc.)
+
+---
+# Final data
+
+All analysis done at the household level...
+
+- **Initial data:** 16.9 million households from 2014-2019
+- Remove households with missing or inconsistent data
+  - 14.6 million remaining
+- Remove households predicted to be insured elsewhere
+  - 8.3 million remaining
+  - 4.5 million of which are new enrollees
+
+---
+# Enrollees over time
+
+.center[
+  ![:scale 50%](../../figures/enrollee_count.png)
+]
+
+
+---
+# Insurers
+
+.pull-left[
+  ![](../../figures/insurer_stack_any.png)
+]
+
+.pull-right[
+  ![](../../figures/insurer_stack_all.png)
+]
+
+
+---
+# Metal tier
+
+.pull-left[
+  ![](../../figures/metal_stack_any.png)
+]
+
+.pull-right[
+  ![](../../figures/metal_stack_all.png)
+
+]
+
+
+---
 class: inverse, center, middle
 name: dominated
 
@@ -241,6 +303,12 @@ name: dominated
 
 &lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
 
+---
+# What is a dominated choice?
+
+.center[
+  ![](https://twitter.com/DaveEvansPhD/status/1234506064470716416?s=20)
+]
 
 ---
 class: inverse, center, middle
@@ -286,6 +354,7 @@ name: steering
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "github",
 "highlightLines": true,
