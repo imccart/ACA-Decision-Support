@@ -2,7 +2,7 @@
 title: "Insurance choice, decision assistance, and insurer steering"
 subtitle: "Ian McCarthy & Evan Saltzman"
 author: Emory University, Lunch and Learn
-date: March 30, 2021 #"`r format(Sys.time(), '%d %B %Y')`"
+date: March 29, 2021 #"`r format(Sys.time(), '%d %B %Y')`"
 header-includes: 
   - \usepackage{graphicx}
   - \usepackage{amsmath}
@@ -325,8 +325,30 @@ name: dominated
 ---
 # What is a dominated choice?
 
+<center>
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr"><a href="https://twitter.com/DaveEvansPhD/status/1234506064470716416">March 2, 2020</a></blockquote><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+</center>
+
+---
+count: false
+
+# What is a dominated choice?
+
+In our context...
+
+- Subsidies available for households with incomes below 250% of the FPL
+- At 150% of the FPL, larger subsidies are such that actuarial value of silver plans exceeds that of gold and platinum plans
+- Gold and platinum plans dominated by silver plans for incomes $\leq$ 150% FPL
+
+--
+
+About 3.2% of households make a dominated choice in our data
+
+---
+# Analysis of dominated choices
+
 .center[
-  ![](https://twitter.com/DaveEvansPhD/status/1234506064470716416?s=20)
+  ![](../../figures/dominated_choice_regression.png)
 ]
 
 ---
@@ -359,6 +381,60 @@ Utility for Outside Option (Uninsured)<br>
 
 $\begin{eqnarray*} U_{i0} &=& \alpha_i \underbrace{\rho_i}_{\textrm{penalty}} \hspace{0.075in} + \hspace{0.075in}  \underbrace{\epsilon_{i0}}_{error} \end{eqnarray*}$
 
+
+---
+# Estimand of interest
+
+- Want to identify the Average Treatment Effect on the Treated (ATT) of decision assistance
+
+- Denote by $Pr[Y_{ij}^{1}]$ the probability of household $i$ selecting plan $j$ with decision assistance
+
+- Denote by $Pr[Y_{ij}^{0}]$ the probability of household $i$ selecting plan $j$ without decision assistance
+
+--
+
+$$ATT = Pr[Y_{ij}^{1} | \text{Assist}] - Pr[Y_{ij}^{0} | \text{Assist}]$$
+
+---
+# Estimation
+
+1. Estimate nested logit model among those without any decision assistance, $\hat{\theta}$
+
+2. Use $\hat{\theta}$ to form predicted counterfactual, $\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}$
+
+3. Use predicted value in ATT estimate: $$\underbrace{Pr[Y_{ij}^{1} | \text{Assist}]}_{Observed} - \underbrace{\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}}_{Predicted}$$
+
+4. Aggregate to level of insurer and metal
+
+
+---
+count: false
+
+# Estimation
+
+- Focus only on new enrollees to avoid presence of inertia
+
+- Estimate separately by year and rating area
+
+---
+# Inference
+
+- Clustered bootstrap, by year and rating area
+
+- 200 bootstrap replications
+
+- Confidence interval based on the 5th and 95th percentile of bootstrap replications
+
+---
+# Effects of decision assistance
+
+.pull-left[
+  ![](../../figures/choice_metals.png)
+]
+
+.pull-right[
+  ![](../../figures/choice_insurer.png)
+]
 
 
 
