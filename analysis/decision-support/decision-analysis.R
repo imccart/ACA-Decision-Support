@@ -124,7 +124,12 @@ hh.full <- hh.full %>%
          assisted=ifelse(channel=="Assisted",1,0),
          channel_detail=as.factor(channel_detail),
          any_agent=ifelse(broker==1 | agent==1, 1, 0),
-         new_enrollee=ifelse(is.na(previous_plan_offered),1,0))
+         new_enrollee=ifelse(is.na(previous_plan_offered),1,0),
+         switch=case_when(
+           new_enrollee==0 & !is.na(plan_number_nocsr) & !is.na(previous_plan_number) & plan_number_nocsr!=previous_plan_number ~ 1,
+           new_enrollee==0 & !is.na(plan_number_nocsr) & !is.na(previous_plan_number) & plan_number_nocsr==previous_plan_number ~ 0,
+           TRUE ~ NA_real_
+         ))
 
 
 ## Filter for only new purchases for plan choice analysis

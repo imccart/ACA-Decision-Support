@@ -334,6 +334,15 @@ About 3.2% of households make a dominated choice in our data
 ]
 
 ---
+# Analysis of switching
+
+.center[
+  ![:scale 50%](../../figures/switching_regression.png)
+]
+
+
+
+---
 class: inverse, center, middle
 name: decision-assist
 
@@ -427,6 +436,84 @@ name: steering
 # Analysis of insurer steering
 
 &lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+---
+# This is preliminary!
+
+.center[
+  ![:scale 50%](https://media.giphy.com/media/3o6Yg9rDXHL8Zrdlza/giphy.gif)
+]
+
+---
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Flat commission 
+- Fixed amount from &lt;span&gt;&amp;#36;&lt;/span&gt;0 to &lt;span&gt;&amp;#36;&lt;/span&gt;264
+
+]
+
+.pull-right[
+  ![](flat_comm.jpg)
+]
+
+---
+count: false
+
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Percentage commission
+- Percent of annual premium, from 1% to 5%
+]
+
+.pull-right[
+  ![](perc_comm.jpg)
+]
+
+---
+count: false
+
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Flat commission, from &lt;span&gt;&amp;#36;&lt;/span&gt;0 to &lt;span&gt;&amp;#36;&lt;/span&gt;264
+- Percentage commission, from 1% to 5% of annual premium
+
+]
+
+--
+
+.pull-right[
+**Sources of variation**
+
+- Insurer
+- New enrollee versus renewal
+- Network type (e.g., HMO vs PPO)
+
+]
+
+---
+# Quantifying steering effect
+
+**Calculate commission elasticities of demand**
+
+1. Estimate nested logit choice model with commission as covariate
+2. Compute commission elasticity (percent change in demand for a 1% increase in commission)
+
+--
+
+|                | Agent Users   | All Enrollees  |
+| -------------- |:-------------:| --------------:|
+| Overall        | 11.18         | 5.39           |
+| Large Insurers | 11.94         | 5.75           |
+| Small Insurers | 6.33          | 3.08           |
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
