@@ -121,6 +121,82 @@ panel.length <- hh.full %>%
   summarize(year_obs=n()) %>%
   arrange(year_obs)
 
+
+
+# Balance among treatment and control -------------------------------------
+
+# estimate propensity scores
+for (t in 2014:2019) {
+  logit.full <- glm(assisted ~ FPL + perc_0to17 + perc_18to25 + perc_65plus + 
+                      perc_black + perc_hispanic + perc_asian + perc_male + household_size,
+                    data=hh.full %>% filter(year==t),
+                    family='binomial')
+  logit.clean <- glm(assisted ~ FPL + perc_0to17 + perc_18to25 + perc_65plus + 
+                       perc_black + perc_hispanic + perc_asian + perc_male + household_size,
+                     data=hh.clean %>% filter(year==t),
+                     family='binomial')
+  
+  hh.full <- hh.full %>% add_predictions(logit.full, type="response", var=paste0("pred_assist_",t))
+  hh.clean <- hh.clean %>% add_predictions(logit.full, type="response", var=paste0("pred_assist_",t))
+}
+
+hh.full <- hh.full %>%
+  mutate(pred_assist=case_when(
+    year==2014 ~ pred_assist_2014,
+    year==2015 ~ pred_assist_2015,
+    year==2016 ~ pred_assist_2016,
+    year==2017 ~ pred_assist_2017,
+    year==2018 ~ pred_assist_2018,
+    year==2019 ~ pred_assist_2019,
+    TRUE ~ NA_real_
+  )) %>%
+  select(-starts_with("pred_assist_"))
+
+
+hh.clean <- hh.clean %>%
+  mutate(pred_assist=case_when(
+    year==2014 ~ pred_assist_2014,
+    year==2015 ~ pred_assist_2015,
+    year==2016 ~ pred_assist_2016,
+    year==2017 ~ pred_assist_2017,
+    year==2018 ~ pred_assist_2018,
+    year==2019 ~ pred_assist_2019,
+    TRUE ~ NA_real_
+  )) %>%
+  select(-starts_with("pred_assist_"))
+
+ggplot(hh.full, aes(x=pred_assist)) + 
+  geom_histogram() + 
+  facet_wrap(~ifelse(assisted==1,"Any Assistance","No Assistance"), ncol=1) +
+  labs(
+    x="Propensity Score",
+    y="Count of Households \n(1000s)"
+    ) +
+  scale_y_continuous(limits = c(0,1000000),
+                     breaks=c(0,250000,500000,750000,1000000),
+                     labels=c("0","250","500","750","1,000")) +
+  theme_bw() + ggsave("figures/ps_assist_full.png")
+
+
+ggplot(hh.clean, aes(x=pred_assist)) + 
+  geom_histogram() + 
+  facet_wrap(~ifelse(assisted==1,"Any Assistance","No Assistance"), ncol=1) +
+  labs(
+    x="Propensity Score",
+    y="Count of Households \n(1000s)"
+  ) +
+  scale_y_continuous(limits = c(0,750000),
+                     breaks=c(0,250000,500000,750000),
+                     labels=c("0","250","500","750")) +
+  theme_bw() + ggsave("figures/ps_assist_clean.png")
+
+
+## use bal.tab in love.plot with pred_assist as weights from prior estimation
+set.cobalt.options(binary="std")
+new.names <- c(FPL = "Federal Poverty Line")
+
+love.plot(assisted~)
+  
 # Summary values for paper ------------------------------------------------
 
 summary(panel.length$year_obs)
