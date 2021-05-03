@@ -290,10 +290,6 @@ name: decision-assist
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=1055px></html>
 
-
----
-# Estimand of interest
-
 ---
 # Estimand of interest
 
