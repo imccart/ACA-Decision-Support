@@ -129,15 +129,9 @@ count: false
 # 2. Potential scale
 
 .center[
-  ![:scale 100%](../pics/kff-uninsured.png)
+  ![:scale 75%](../pics/kff-uninsured.png)
 ]
     
-    
-    
-.footnote[
-  [Kaiser Family Foundation, November, 2020](https://www.kff.org/policy-watch/millions-of-uninsured-americans-are-eligible-for-free-aca-health-insurance/)
-]
-
 
 ---
 # This paper
