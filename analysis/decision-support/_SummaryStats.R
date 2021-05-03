@@ -150,8 +150,12 @@ hh.full <- hh.full %>%
     year==2019 ~ pred_assist_2019,
     TRUE ~ NA_real_
   )) %>%
-  select(-starts_with("pred_assist_"))
-
+  select(-starts_with("pred_assist_")) %>%
+  mutate(ipweight=case_when(
+    assisted==1 ~ 1,
+    assisted==0 ~ pred_assist/(1-pred_assist),
+    TRUE ~ NA_real_
+  ))
 
 hh.clean <- hh.clean %>%
   mutate(pred_assist=case_when(
@@ -163,7 +167,12 @@ hh.clean <- hh.clean %>%
     year==2019 ~ pred_assist_2019,
     TRUE ~ NA_real_
   )) %>%
-  select(-starts_with("pred_assist_"))
+  select(-starts_with("pred_assist_")) %>%
+  mutate(ipweight=case_when(
+    assisted==1 ~ 1,
+    assisted==0 ~ pred_assist/(1-pred_assist),
+    TRUE ~ NA_real_
+  ))
 
 ggplot(hh.full, aes(x=pred_assist)) + 
   geom_histogram() + 
@@ -191,11 +200,40 @@ ggplot(hh.clean, aes(x=pred_assist)) +
   theme_bw() + ggsave("figures/ps_assist_clean.png")
 
 
-## use bal.tab in love.plot with pred_assist as weights from prior estimation
-set.cobalt.options(binary="std")
-new.names <- c(FPL = "Federal Poverty Line")
 
-love.plot(assisted~)
+set.cobalt.options(binary="std")
+new.names <- c(FPL = "Federal Poverty Level",
+               perc_0to17 = "Percent below 18",
+               perc_18to25 = "Percent 18 to 25",
+               perc_65plus = "Percent 65+",
+               perc_black = "Percent Black",
+               perc_hispanic = "Percent Hispanic",
+               perc_asian = "Percent Asian",
+               perc_male = "Percent Male",
+               household_size = "HH Size")
+
+covs <- hh.full %>% select(FPL, perc_0to17, perc_18to25, perc_65plus, 
+                   perc_black, perc_hispanic, perc_asian, perc_male, 
+                   household_size)
+
+love.plot(bal.tab(covs, treat = hh.full$assisted, weights = hh.full$ipweight),
+          data=hh.full,
+          estimand="ATT",
+          stats=c("mean.diffs", "ks.statistics"),
+          var.order="unadjusted",
+          abs=TRUE,
+          line=FALSE,
+          thresholds=c(m=0.1, ks=0.05),
+          var.names=new.names,
+          colors=c("black", "gray"),
+          shapes=c("circle filled", "circle"),
+          sample.names=c("Unweighted", "IPW-ATT"),
+          limits=list(m=c(0,.25),
+                      ks=c(0,.25)),
+          wrap=20,
+          position="bottom",
+          title=NULL)
+ggsave("figures/cov_balance.png")
   
 # Summary values for paper ------------------------------------------------
 
