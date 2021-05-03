@@ -128,16 +128,8 @@ count: false
 
 # 2. Potential scale
 
-.pull-left[
-Exchanges relatively large, but...
-
-- Large number of people still uninsured
-
-- Many eligible for some type of subsidy on exchanges
-]
-
-.pull-right[
-  ![:scale 150%](../pics/kff-uninsured.png)
+.center[
+  ![:scale 200%](../pics/kff-uninsured.png)
 ]
     
     
