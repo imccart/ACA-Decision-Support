@@ -325,7 +325,7 @@ $\begin{eqnarray*} U_{i0} &=& \alpha_i \underbrace{\rho_i}_{\textrm{penalty}} \h
 
 --
 
-$$ATT = N_{j}^{1} - N_{j}^{0} $$
+$$ATT = N_{j}^{1} - N_{j}^{0}$$
 
 ---
 # Estimation
