@@ -292,51 +292,32 @@ name: decision-assist
 
 
 ---
-# Consumer choice model
-
-Household i's Utility for Plan j<br>
-
-$\begin{eqnarray}U_{ij} &=& \alpha_i \underbrace{p_{ij}}_{cons.\\prem.} \hspace{0.075in} + \hspace{0.075in} \underbrace{x'_{j}}_{obs.\\prod.} \beta \hspace{0.075in} + \hspace{0.075in} \underbrace{d'_{i}}_{dem.\\char.} \varphi \hspace{0.075in} + \hspace{0.075in} \underbrace{\xi_{j}}_{unobs.\\prod.} \hspace{0.075in} + \hspace{0.075in} \underbrace{\epsilon_{ij}}_{error} \nonumber\end{eqnarray}$
-	
-where<br>
-
-$\begin{eqnarray*}\alpha_i &=& \alpha + d'_i \gamma \end{eqnarray*}$ 
-
-$\begin{eqnarray*}\underbrace{p_{ij}}_{cons.\\prem.} &=& \underbrace{r_{i}}_{rating\\ fact.} \underbrace{p_j}_{full\\prem.} \hspace{0.075in} - \hspace{0.075in} \underbrace{\max\{p_b - \mathrm{cap}_i,0\}}_{subsidy} \end{eqnarray*}$
-
----
-count: false
-
-# Consumer choice model
-
-Utility for Outside Option (Uninsured)<br>
-
-$\begin{eqnarray*} U_{i0} &=& \alpha_i \underbrace{\rho_i}_{\textrm{penalty}} \hspace{0.075in} + \hspace{0.075in}  \underbrace{\epsilon_{i0}}_{error} \end{eqnarray*}$
-
+# Estimand of interest
 
 ---
 # Estimand of interest
 
 - Want to identify the Average Treatment Effect on the Treated (ATT) of decision assistance
 
-- Denote by $N_{j}^{1} = \sum_{i} 1(Y_{ij}^{1}=1 | \text{Assist})$ the the count of enrollees in plan $j$ had they received decision assistance, conditional on receiving assistance
+- Denote by $Pr[Y_{ij}^{1}]$ the probability of household $i$ selecting plan $j$ with decision assistance
 
-- Denote by $N_{j}^{0} = \sum_{i} 1(Y_{ij}^{0}=1 | \text{Assist})$ the count of enrollees in plan $j$ had they not received decision assistance, conditional on receiving assistance
+- Denote by $Pr[Y_{ij}^{0}]$ the probability of household $i$ selecting plan $j$ without decision assistance
 
 --
 
-$$ATT = N_{j}^{1} - N_{j}^{0}$$
+$$ATT = Pr[Y_{ij}^{1} | \text{Assist}] - Pr[Y_{ij}^{0} | \text{Assist}]$$
+
 
 ---
 # Estimation
 
-1. Estimate nested logit model among those without any decision assistance, $\hat{\theta}$
+1. Estimate multinomial logit model among those without any decision assistance, $\hat{\theta}$
 
-2. Use $\hat{\theta}$ to form predicted counterfactual, $\hat{N}_{j}^{0} = \sum_{i} \widehat{Pr[Y_{ij}^{0} | \text{Assist}]}$
+2. Use $\hat{\theta}$ to form predicted counterfactual, $\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}$
 
-3. Use predicted value in ATT estimate: $$\underbrace{N_{j}^{1}}_{Observed} - \underbrace{\hat{N}_{j}^{0}}_{Predicted}$$
+3. Use predicted value in ATT estimate: $$\underbrace{Pr[Y_{ij}^{1} | \text{Assist}]}_{Observed} - \underbrace{\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}}_{Predicted}$$
 
-4. Aggregate to level of insurer and metal tier
+4. Aggregate to level of insurer and metal
 
 
 ---
