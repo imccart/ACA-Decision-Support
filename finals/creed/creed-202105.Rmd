@@ -262,14 +262,33 @@ In our context...
 About 3.2% of households make a dominated choice in our data
 
 ---
-# Analysis of dominated choices
+# Estimation and identification
+
+- Linear probability model of dominated choices or switching
+- Dummy variable for receiving any assistance
+- Selection on observables assumption (for now)
+
+---
+# Selection on observables
+
+.pull-left[
+  ![](../../figures/cov_balance.png)
+]
+
+.pull-right[
+  ![](../../figures/ps_assist_full.png)
+
+]
+
+---
+# Decision assistance and dominated choices
 
 .center[
   ![:scale 50%](../../figures/dominated_choice_regression.png)
 ]
 
 ---
-# Analysis of switching
+# Decision assistance and switching
 
 .center[
   ![:scale 50%](../../figures/switching_regression.png)
@@ -281,7 +300,7 @@ About 3.2% of households make a dominated choice in our data
 class: inverse, center, middle
 name: decision-assist
 
-# Effect of decision assistance
+# Effect of decision assistance on plan choice
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=1055px></html>
 
@@ -343,18 +362,6 @@ count: false
 
 - Estimate separately by year and rating area
 
-
----
-# Selection on observables
-
-.pull-left[
-  ![](../../figures/cov_balance.png)
-]
-
-.pull-right[
-  ![](../../figures/ps_assist_full.png)
-
-]
 
 
 ---
