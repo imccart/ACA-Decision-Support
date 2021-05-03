@@ -84,7 +84,7 @@ Below are links to different abstracts, presentations, and the main paper.
     
 - [Emory Brown Bag Presentation, 2021](finals/lunch-and-learn/lunch-learn-202103.html) This is a brown bag presentation from March 2021.
 
-- [Carolina Region Empirical Economics Day (CREED) Presentation, 2021](finals/creed-202105.html) This is a presentation for the CREED conference from May 2021.
+- [Carolina Region Empirical Economics Day (CREED) Presentation, 2021](finals/creed/creed-202105.html) This is a presentation for the CREED conference from May 2021.
 
  
 
