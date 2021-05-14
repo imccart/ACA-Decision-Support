@@ -43,11 +43,7 @@ dchoice.est <- function(d, oos, t, r) {
   nested.formula <- formula(paste("choice ~", paste(all_covars, collapse=" + "),"| 0"))  
   logit.formula <- formula(paste("choice ~", paste(all_covars, collapse=" + ")))
   
-  nest.names <- unique(d$plan_name)
-  nest.in <- nest.names[nest.names != "Uninsured"]
-  nest.out <- nest.names[nest.names == "Uninsured"]
-  
-  
+
   ## Find initial values from logit and apply to mclogit
   logit.start <- glm(logit.formula, data=d, family="binomial")
   test <- is.error(mclogit(mclogit.formula, data=d))

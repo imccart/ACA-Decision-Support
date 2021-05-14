@@ -186,9 +186,10 @@ choice.data.fnc <- function(t, r) {
            hh_size=hh_size*(1-uninsured_plan)) %>%
     mutate_at(vars(HMO, HSA, platinum, gold, silver, bronze), ~replace(., is.na(.), 0)) %>%
     group_by(household_id) %>%
-    mutate(plan_name=str_replace(plan_name, "SIL.*","SIL")) %>%
     arrange(household_id, plan_name) %>%
     ungroup()
+  
+  # mutate(plan_name=str_replace(plan_name, "SIL.*","SIL")) %>%  
   
   
   # Estimation and prediction samples

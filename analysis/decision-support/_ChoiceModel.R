@@ -25,6 +25,10 @@ for (t in time.dat) {
     choice.data <- choice.data.fnc(t=t,r=r)
     assign(paste0("est.data.",r,".",t), choice.data$est.data)
     assign(paste0("oos.data.",r,".",t), choice.data$oos.data)
+    nest.names <- unique(choice.data$est.data$plan_name)
+    nest.in <- nest.names[nest.names != "Uninsured"]
+    nest.out <- nest.names[nest.names == "Uninsured"]
+    
     choice.est <- dchoice.est(d=choice.data$est.data, oos=choice.data$oos.data, t=t, r=r)
     
     treated.dat <- choice.est$pred
@@ -36,7 +40,7 @@ for (t in time.dat) {
       final.data <- bind_rows(final.data, treated.dat)
       final.coef <- bind_rows(final.coef, coef.vals)
     }
-    future.tracking <- c(future.tracking, paste0("est.data.",r,".",t), paste0("oos.data.",r,".",t))      
+    future.tracking <- c(future.tracking, paste0("est.data.",r,".",t), paste0("oos.data.",r,".",t), "nest.in", "nest.out")      
   }
   
   assign(paste0("final.data.",t),final.data)
