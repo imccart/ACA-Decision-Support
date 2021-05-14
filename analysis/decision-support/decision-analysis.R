@@ -13,7 +13,7 @@
 if (!require("pacman")) renv::install('pacman')
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stargazer, knitr, kableExtra,
                lfe, modelr, mclogit, bookdown, future, parallel, nnet, mixl, fixest,
-               future.apply, gtsummary, emo, twilio, SAScii, data.table, scales,
+               future.apply, gtsummary, emo, twilio, SAScii, data.table, scales, mlogit,
                modelsummary, cobalt, WeightIt)
 
 source('paths.R')
@@ -146,3 +146,4 @@ source('analysis/decision-support/_DominatedChoices.R')
 rm("hh.full","households","max.age","language","hh.language","panel.length")
 source('analysis/decision-support/_ChoiceModel.R')
 source('analysis/decision-support/_ChoiceSummary.R')
+

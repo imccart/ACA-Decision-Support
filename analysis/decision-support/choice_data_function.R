@@ -194,7 +194,7 @@ choice.data.fnc <- function(t, r) {
   # Estimation and prediction samples
   untreated.dat <- small.dat %>%
     filter(channel=="Unassisted") %>% 
-    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id,
+    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id, year, hh_region,
            uninsured_plan, AV, hh_size, any_0to17, any_black, any_hispanic, FPL_250to400, FPL_400plus, 
            HMO, HSA, platinum, gold, silver, bronze,
            hh_size_prem, any_0to17_prem, any_black_prem, any_hispanic_prem, FPL_250to400_prem, FPL_400plus_prem, 
@@ -202,7 +202,7 @@ choice.data.fnc <- function(t, r) {
   
   treated.dat <- small.dat %>%
     filter(channel!="Unassisted") %>% 
-    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id,
+    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id, year, hh_region,
            uninsured_plan, AV, hh_size, any_0to17, any_black, any_hispanic, FPL_250to400, FPL_400plus, 
            HMO, HSA, platinum, gold, silver, bronze,
            hh_size_prem, any_0to17_prem, any_black_prem, any_hispanic_prem, FPL_250to400_prem, FPL_400plus_prem, 
@@ -226,7 +226,7 @@ choice.data.fnc <- function(t, r) {
   ## Final data
   est.data <- untreated.dat %>%
     inner_join(sample.hh, by=c("household_number")) %>%          
-    select(plan_name, household_number, choice, premium,
+    select(plan_name, household_number, choice, premium, year, hh_region,
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan,
            hh_size_prem, any_0to17_prem, FPL_250to400_prem, FPL_400plus_prem, any_black_prem, any_hispanic_prem,
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
@@ -234,7 +234,7 @@ choice.data.fnc <- function(t, r) {
   
   oos.data <- treated.dat %>%
     inner_join(sample.hh.oos, by=c("household_number")) %>%              
-    select(plan_name, household_number, choice, premium,
+    select(plan_name, household_number, choice, premium, year, hh_region,
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan, 
            hh_size_prem, any_0to17_prem, FPL_250to400_prem, FPL_400plus_prem, any_black_prem, any_hispanic_prem,
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
