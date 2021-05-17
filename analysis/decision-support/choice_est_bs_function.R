@@ -70,7 +70,7 @@ dchoice.bs <- function(time, area) {
       #             pred_purchase=sum(pred_purchase, na.rm=TRUE),
       #             tot_count=n())
       
-      oos.nest <- mlogit.data(oos.data, choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
+      oos.nest <- mlogit.data(bind_rows(oos.data, est.data), choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
       nested.pred <- predict(nested.logit, newdata=oos.nest)
       nested.pred <- as_tibble(nested.pred, rownames="household_number") %>% mutate(household_number=as.numeric(household_number))
       nested.pred <- nested.pred %>% pivot_longer(!household_number, names_to="plan_name", values_to="pred_purchase")
