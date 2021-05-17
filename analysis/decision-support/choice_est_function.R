@@ -22,28 +22,28 @@ dchoice.est <- function(d, oos, t, r) {
   ins.offer[4] <- sum(d$Health_Net==1 & d$choice==1)/tot.choice
 
   all.hmo <- sum(d$HMO==1 & d$choice==1)/tot.choice
-  if (all.hmo>.3) {
+  if (all.hmo>.1) {
     all_covars=c(all_covars, "HMO")
   }
   all.hsa <- sum(d$HSA==1 & d$choice==1)/tot.choice
-  if (all.hsa>.3) {
+  if (all.hsa>.1) {
     all_covars=c(all_covars, "HSA")
   }
   
   cml.share <- ins.offer[1]
-  if (ins.offer[1]>.3 & cml.share<.9) {
+  if (ins.offer[1]>.4 & cml.share<.9) {
     all_covars=c(all_covars, "Anthem")
   }
   cml.share <- cml.share+ins.offer[2]
-  if (ins.offer[2]>.3 & cml.share<.9) {
+  if (ins.offer[2]>.4 & cml.share<.9) {
     all_covars=c(all_covars, "Blue_Shield")
   }
   cml.share <- cml.share+ins.offer[3]
-  if (ins.offer[3]>.3 & cml.share<.9) {
+  if (ins.offer[3]>.4 & cml.share<.9) {
     all_covars=c(all_covars, "Kaiser")
   }
   cml.share <- cml.share+ins.offer[4]
-  if (ins.offer[4]>.3 & cml.share<.9) {
+  if (ins.offer[4]>.4 & cml.share<.9) {
     all_covars=c(all_covars, "Health_Net")
   }  
   
@@ -55,7 +55,7 @@ dchoice.est <- function(d, oos, t, r) {
 
   ## Find initial values from logit and apply to mclogit
   logit.start <- glm(logit.formula, data=d, family="binomial")
-  test <- is.error(mclogit(mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)))
+  test <- is.error(mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE))
   if (test==FALSE) {
 #    mc.logit <- mclogit(mclogit.formula, data=d)
     nested.logit <- mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)
@@ -85,7 +85,7 @@ dchoice.est <- function(d, oos, t, r) {
   #             pred_purchase=sum(pred_purchase, na.rm=TRUE),
   #             tot_count=n())
 
-  oos.nest <- mlogit.data(oos, choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
+  oos.nest <- mlogit.data(bind_rows(oos, d), choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
   nested.pred <- predict(nested.logit, newdata=oos.nest)
   nested.pred <- as_tibble(nested.pred, rownames="household_number") %>% mutate(household_number=as.numeric(household_number))
   nested.pred <- nested.pred %>% pivot_longer(!household_number, names_to="plan_name", values_to="pred_purchase")

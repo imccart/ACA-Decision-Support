@@ -157,7 +157,7 @@ choice.data.fnc <- function(t, r) {
     filter(!is.na(final_premium), !is.na(plan_name)) %>%
     mutate(net_premium=case_when(
             plan_name!="Uninsured" ~ final_premium,
-            plan_name!="Uninsured" ~ monthly_penalty),
+            plan_name=="Uninsured" ~ monthly_penalty),
            net_premium=net_premium/hh_size,
            FPL_250to400=ifelse(FPL > 2.50 & FPL <= 4.00, 1, 0),
            FPL_400plus=ifelse(FPL >  4.00, 1, 0),
@@ -182,10 +182,11 @@ choice.data.fnc <- function(t, r) {
            Health_Net=ifelse(Issuer_Name=="Health_Net",1,0)) %>%
     mutate_at(vars(HMO, HSA, platinum, gold, silver, bronze), ~replace(., is.na(.), 0)) %>%
     group_by(household_id) %>%
+    mutate(plan_name=str_replace(plan_name, "SIL94","SIL"),
+           plan_name=str_replace(plan_name, "SIL73","SIL"),
+           plan_name=str_replace(plan_name, "SIL87","SIL")) %>%
     arrange(household_id, plan_name) %>%
     ungroup()
-  
-  # mutate(plan_name=str_replace(plan_name, "SIL.*","SIL")) %>%  
   
   
   # Estimation and prediction samples
@@ -210,7 +211,7 @@ choice.data.fnc <- function(t, r) {
     mutate(hh_count=seq(n())) %>%
     filter(hh_count==1) %>%
     select(household_number) %>% ungroup()
-  sample.hh <- sample_frac(unique.hh, size=0.05, replace=FALSE)
+  sample.hh <- sample_frac(unique.hh, size=0.15, replace=FALSE)
   
   unique.hh.oos <- treated.dat %>%
     group_by(household_number) %>%

@@ -43,7 +43,7 @@ dchoice.bs <- function(time, area) {
       nested.formula <- formula(paste("choice ~", paste(all_covars, collapse=" + "),"| 0"))  
     
       ## Estimate model and store results
-      test <- is.error(mclogit(mclogit.formula, data=est.data, start=beta_initial))
+      test <- is.error(mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE), start=beta_initial)
       if (test==FALSE) {
         # mc.logit <- mclogit(mclogit.formula, data=est.data, start=beta_initial)  
         nested.logit <- mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE,
