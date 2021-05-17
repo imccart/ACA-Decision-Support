@@ -12,14 +12,23 @@ dchoice.est <- function(d, oos, t, r) {
   a.thresh <- as.numeric(afford.threshold %>% filter(year==t) %>% select(cutoff))
 
   ## Terms for estimation
-  all_covars=c("premium", "HMO", "HSA", "silver")
-  ins.offer <- c(0,0,0,0)
+  all_covars=c("premium", "silver")
+  ins.offer <- c(0,0)
   cml.share <- 0
   tot.choice <- sum(d$choice==1)
   ins.offer[1] <- sum(d$Anthem==1 & d$choice==1)/tot.choice
   ins.offer[2] <- sum(d$Blue_Shield==1 & d$choice==1)/tot.choice
   ins.offer[3] <- sum(d$Kaiser==1 & d$choice==1)/tot.choice
   ins.offer[4] <- sum(d$Health_Net==1 & d$choice==1)/tot.choice
+
+  all.hmo <- sum(d$HMO==1 & d$choice==1)/tot.choice
+  if (all.hmo>.3) {
+    all_covars=c(all_covars, "HMO")
+  }
+  all.hsa <- sum(d$HSA==1 & d$choice==1)/tot.choice
+  if (all.hsa>.3) {
+    all_covars=c(all_covars, "HSA")
+  }
   
   cml.share <- ins.offer[1]
   if (ins.offer[1]>.3 & cml.share<.9) {
@@ -46,7 +55,7 @@ dchoice.est <- function(d, oos, t, r) {
 
   ## Find initial values from logit and apply to mclogit
   logit.start <- glm(logit.formula, data=d, family="binomial")
-  test <- is.error(mclogit(mclogit.formula, data=d))
+  test <- is.error(mclogit(mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)))
   if (test==FALSE) {
 #    mc.logit <- mclogit(mclogit.formula, data=d)
     nested.logit <- mlogit(nested.formula, data=nested.data, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)

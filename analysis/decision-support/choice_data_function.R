@@ -155,7 +155,9 @@ choice.data.fnc <- function(t, r) {
   # Create smaller dataset with only relevant variables and consistent choice set
   small.dat <- choices %>%
     filter(!is.na(final_premium), !is.na(plan_name)) %>%
-    mutate(net_premium=final_premium-monthly_penalty,
+    mutate(net_premium=case_when(
+            plan_name!="Uninsured" ~ final_premium,
+            plan_name!="Uninsured" ~ monthly_penalty),
            net_premium=net_premium/hh_size,
            FPL_250to400=ifelse(FPL > 2.50 & FPL <= 4.00, 1, 0),
            FPL_400plus=ifelse(FPL >  4.00, 1, 0),
@@ -177,13 +179,7 @@ choice.data.fnc <- function(t, r) {
     mutate(Anthem=ifelse(Issuer_Name=="Anthem",1,0),
            Blue_Shield=ifelse(Issuer_Name=="Blue_Shield",1,0),
            Kaiser=ifelse(Issuer_Name=="Kaiser",1,0),
-           Health_Net=ifelse(Issuer_Name=="Health_Net",1,0),
-           any_0to17=any_0to17*(1-uninsured_plan),
-           any_black=any_black*(1-uninsured_plan),
-           any_hispanic=any_hispanic*(1-uninsured_plan),
-           FPL_250to400=FPL_250to400*(1-uninsured_plan),
-           FPL_400plus=FPL_400plus*(1-uninsured_plan),
-           hh_size=hh_size*(1-uninsured_plan)) %>%
+           Health_Net=ifelse(Issuer_Name=="Health_Net",1,0)) %>%
     mutate_at(vars(HMO, HSA, platinum, gold, silver, bronze), ~replace(., is.na(.), 0)) %>%
     group_by(household_id) %>%
     arrange(household_id, plan_name) %>%
