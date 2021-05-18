@@ -238,5 +238,14 @@ choice.data.fnc <- function(t, r) {
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
            Anthem, Blue_Shield, Kaiser, Health_Net)
   
+  oos.data <- oos.data %>%
+    inner_join(est.data %>% distinct(plan_name),
+               by="plan_name") %>%
+    group_by(household_number) %>%
+    mutate(any_choice=max(choice)) %>%
+    filter(any_choice==1) %>%
+    ungroup() %>%
+    select(-any_choice)
+  
   return(list("est.data"=est.data, "oos.data"=oos.data))
 }
