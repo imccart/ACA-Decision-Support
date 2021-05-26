@@ -7,19 +7,17 @@
 
 # Estimation function -----------------------------------------------------
 
-choice.data.fnc <- function(t, r) {
-  
-  a.thresh <- as.numeric(afford.threshold %>% filter(year==t) %>% select(cutoff))
+choice.data.fnc2 <- function(plans, hhs) {
+
   outside=tibble(
     plan_name="Uninsured",
-    region=r,
     Issuer_Name="Outside_Option"
   )
   
-  choice.set <- plan_data %>% filter(Year==t, region==r) %>%
-    select(plan_name=Plan_Name2, Issuer_Name=Insurer, region, PLAN_NETWORK_TYPE, metal_level=Metal_Level, metal, 
+  choice.set <- as_tibble(plans) %>% 
+    select(plan_name=Plan_Name2, Issuer_Name=Insurer, PLAN_NETWORK_TYPE, metal_level=Metal_Level, metal, 
            Premium, MSP, HSA) %>%
-    group_by(plan_name, region) %>%
+    group_by(plan_name) %>%
     summarize(Issuer_Name=first(Issuer_Name),
               PLAN_NETWORK_TYPE=first(PLAN_NETWORK_TYPE),
               metal_level=first(metal_level),
@@ -32,11 +30,11 @@ choice.data.fnc <- function(t, r) {
     bind_rows(outside)
   
   
-  full.choice.data <- hh.clean %>% filter(year==t, region==r) %>%
-    select(household_id, year, zip3, FPL, subsidized_members, hh_region=region, hh_rating=rating_factor,
+  full.choice.data <- as_tibble(hhs) %>% 
+    select(household_id, zip3, FPL, subsidized_members, hh_rating=rating_factor,
            hh_plan_number = plan_number_nocsr, hh_plan_id=plan_id, penalty, hh_insurer=insurer,
-           hh_plan_name = plan_name, oldest_member, cheapest_premium, subsidy, poverty_threshold) %>%
-    full_join(choice.set, by=c("hh_region"="region")) 
+           hh_plan_name = plan_name, oldest_member, cheapest_premium, subsidy, poverty_threshold, cutoff) %>%
+    merge(choice.set) 
   
   
   ## Remove plans that are not available for specific households.
@@ -61,7 +59,7 @@ choice.data.fnc <- function(t, r) {
       eff_premium = case_when(
         subsidized_members>0 ~ (cheapest_premium-subsidy)*12,
         subsidized_members==0 ~ cheapest_premium*12),
-      threshold = a.thresh*FPL*poverty_threshold)
+      threshold = cutoff*FPL*poverty_threshold)
   
   clean.choice.data <- clean.choice.data %>%
     filter((oldest_member<30 &  !is.na(oldest_member) & eff_premium>threshold & metal_level=="Minimum Coverage") | 
@@ -101,7 +99,7 @@ choice.data.fnc <- function(t, r) {
   clean.choice.large <- clean.choice.data %>%
     filter(Issuer_Name %in% c('Anthem', 'Blue_Shield', 'Kaiser', 'Health_Net', 'Outside_Option')) %>%
     mutate(monthly_penalty=penalty/12) %>%
-    select(household_id, year, FPL, hh_plan_name, oldest_member, hh_region, hh_insurer,
+    select(household_id, FPL, hh_plan_name, oldest_member, hh_insurer,
            cheapest_premium, Issuer_Name, PLAN_NETWORK_TYPE, MSP, HMO, HSA,
            metal_level, metal, plan_name,
            final_subsidy, final_premium, plan_choice, insured, monthly_penalty,
@@ -109,7 +107,7 @@ choice.data.fnc <- function(t, r) {
   
   clean.choice.small <- clean.choice.data %>%
     filter(!Issuer_Name %in% c('Anthem', 'Blue_Shield', 'Kaiser', 'Health_Net', 'Outside_Option')) %>%
-    group_by(household_id, year, hh_region, metal) %>%
+    group_by(household_id, metal) %>%
     summarize(final_premium=min(final_premium, na.rm=TRUE),
               plan_choice=max(plan_choice,na.rm=TRUE),
               FPL=first(FPL), hh_plan_name=first(hh_plan_name),
@@ -121,7 +119,7 @@ choice.data.fnc <- function(t, r) {
               silver=mean(silver, na.rm=TRUE), bronze=mean(bronze, na.rm=TRUE),
               AV=mean(AV, na.rm=TRUE))%>%
     mutate(monthly_penalty=penalty/12) %>%      
-    select(household_id, year, FPL, hh_plan_name, oldest_member, hh_region,
+    select(household_id, FPL, hh_plan_name, oldest_member,
            cheapest_premium, plan_choice, insured, final_premium, monthly_penalty,
            platinum, gold, silver, bronze, AV, metal) %>%
     mutate(Issuer_Name='Small_Insurer', hh_insurer="Small_Insurer",
@@ -136,14 +134,14 @@ choice.data.fnc <- function(t, r) {
   
   ## Final dataset (for zip and year)
   choices <- bind_rows(clean.choice.large,clean.choice.small) %>%
-    select(household_id, year, hh_region, FPL, hh_plan_name, hh_insurer, oldest_member,
+    select(household_id, FPL, hh_plan_name, hh_insurer, oldest_member,
            cheapest_premium, Issuer_Name, PLAN_NETWORK_TYPE, MSP, metal, HMO, HSA,
            metal_level, final_subsidy, final_premium, plan_choice, insured, monthly_penalty,
            platinum, silver, gold, bronze, AV, plan_name) %>%
-    left_join(hh.clean %>% select(household_id, year, hh_region=region, tax_unit_type, hh_size=household_size, ipweight,
+    left_join(hhs %>% select(household_id, tax_unit_type, hh_size=household_size, ipweight,
                                   starts_with('lang_'), starts_with('perc_'), starts_with('exempt'),
                                   dominated_choice, navigator, broker, agent, channel),
-              by=c("household_id", "year", "hh_region")) %>%
+              by="household_id") %>%
     mutate(metal=ifelse(is.na(metal),"Other",metal),
            plan_choice = case_when(
              plan_choice==1 & insured==1 ~ 1,
@@ -192,7 +190,7 @@ choice.data.fnc <- function(t, r) {
   # Estimation and prediction samples
   untreated.dat <- small.dat %>%
     filter(channel=="Unassisted") %>% 
-    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id, year, hh_region,
+    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id,
            uninsured_plan, AV, hh_size, any_0to17, any_black, any_hispanic, FPL_250to400, FPL_400plus, 
            HMO, HSA, platinum, gold, silver, bronze,
            hh_size_prem, any_0to17_prem, any_black_prem, any_hispanic_prem, FPL_250to400_prem, FPL_400plus_prem, 
@@ -200,7 +198,7 @@ choice.data.fnc <- function(t, r) {
   
   treated.dat <- small.dat %>%
     filter(channel!="Unassisted") %>% 
-    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id, year, hh_region,
+    select(choice=plan_choice, plan_name, premium=net_premium, household_number=household_id,
            uninsured_plan, AV, hh_size, any_0to17, any_black, any_hispanic, FPL_250to400, FPL_400plus, 
            HMO, HSA, platinum, gold, silver, bronze,
            hh_size_prem, any_0to17_prem, any_black_prem, any_hispanic_prem, FPL_250to400_prem, FPL_400plus_prem, 
@@ -224,15 +222,16 @@ choice.data.fnc <- function(t, r) {
   ## Final data
   est.data <- untreated.dat %>%
     inner_join(sample.hh, by=c("household_number")) %>%          
-    select(plan_name, household_number, choice, premium, year, hh_region,
+    select(plan_name, household_number, choice, premium, 
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan,
            hh_size_prem, any_0to17_prem, FPL_250to400_prem, FPL_400plus_prem, any_black_prem, any_hispanic_prem,
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
-           Anthem, Blue_Shield, Kaiser, Health_Net, ipweight)
+           Anthem, Blue_Shield, Kaiser, Health_Net, ipweight) %>%
+    mutate(assisted=0)
   
   oos.data <- treated.dat %>%
     inner_join(sample.hh.oos, by=c("household_number")) %>%              
-    select(plan_name, household_number, choice, premium, year, hh_region,
+    select(plan_name, household_number, choice, premium,
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan, 
            hh_size_prem, any_0to17_prem, FPL_250to400_prem, FPL_400plus_prem, any_black_prem, any_hispanic_prem,
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
@@ -245,7 +244,9 @@ choice.data.fnc <- function(t, r) {
     mutate(any_choice=max(choice)) %>%
     filter(any_choice==1) %>%
     ungroup() %>%
-    select(-any_choice)
+    select(-any_choice) %>%
+    mutate(assisted=1)
   
-  return(list("est.data"=est.data, "oos.data"=oos.data))
+  all.data <- bind_rows(est.data, oos.data)
+  return(all.data)
 }

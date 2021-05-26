@@ -8,7 +8,7 @@
 
 # Estimation function -----------------------------------------------------
 
-dchoice.est <- function(d, oos, t, r) {
+dchoice.reg <- function(d, names) {
 
   ## Terms for estimation
   all_covars=c("premium", "silver")
@@ -51,54 +51,42 @@ dchoice.est <- function(d, oos, t, r) {
   nested.formula <- formula(paste("choice ~", paste(all_covars, collapse=" + "),"| 0"))  
   logit.formula <- formula(paste("choice ~", paste(all_covars, collapse=" + ")))
   
-
-  ## Find initial values from logit and apply to mclogit
+  ## Find initial values from logit and apply to nested logit
   logit.start <- glm(logit.formula, data=d, family="binomial")
-  test <- is.error(mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE))
+  test <- is.error(mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=names, uninsured="Uninsured"), un.nest.el=TRUE))
   if (test==FALSE) {
-#    mc.logit <- mclogit(mclogit.formula, data=d)
-    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)
+    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=names, uninsured="Uninsured"), un.nest.el=TRUE)
   } else {
-#    mc.logit <- mclogit(mclogit.formula, data=d, start=logit.start$coefficients[2:length(logit.start$coefficients)])
-    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE,
+    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=names, uninsured="Uninsured"), un.nest.el=TRUE,
                            start=logit.start$coefficients[2:length(logit.start$coefficients)])    
   }
 
-
-  ## MCLogit estimation
-  coef.name <- as_tibble(names(nested.logit$coefficients)) %>%
-    rename("variable"=value)
-  coef.est <- as_tibble(nested.logit$coefficients) %>%
-    rename("estimate"=value)
-  coef.vals <- bind_cols(coef.name, coef.est) %>% 
-    mutate(region=r,
-           year=t)
+  ## Finalize data for output
+  return(nested.logit)
+        
+}
+  
+dchoice.pred <- function(data, regcoef) {
   
   ## Out of sample predictions (predicted values for treated group)
+  oos.nest <- mlogit.data(data, choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
+  oos <- data %>%
+    filter(assisted==0)
   
-  # treated.dat <- add_predictions(oos, mc.logit, var="pred_purchase", type="response") %>%
-  #   mutate(region=r, year=t) %>%
-  #   group_by(plan_name) %>%
-  #   summarize(tot_nonmiss=sum(!is.na(pred_purchase)),
-  #             obs_purchase=sum(choice, na.rm=TRUE),
-  #             pred_purchase=sum(pred_purchase, na.rm=TRUE),
-  #             tot_count=n())
-
-  oos.nest <- mlogit.data(bind_rows(oos, d), choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
-  nested.pred <- predict(nested.logit, newdata=oos.nest)
+  nested.pred <- predict(regcoef, newdata=oos.nest)  
+  return(nested.pred)
+}  
+  
+  
   nested.pred <- as_tibble(nested.pred, rownames="household_number") %>% mutate(household_number=as.numeric(household_number))
   nested.pred <- nested.pred %>% pivot_longer(!household_number, names_to="plan_name", values_to="pred_purchase")
   treated.dat <- oos %>%
     left_join(nested.pred, by=c("household_number", "plan_name")) %>%
-       mutate(region=r, year=t) %>%
-       group_by(plan_name) %>% 
-       summarize(tot_nonmiss=sum(!is.na(pred_purchase)),
-                 obs_purchase=sum(choice, na.rm=TRUE),
-                 pred_purchase=sum(pred_purchase, na.rm=TRUE),
-                 tot_count=n())
-    
-  ## Finalize data for output
-  return(list("pred"=treated.dat, "coef"=coef.vals))  
-        
-}
+    group_by(plan_name) %>% 
+    summarize(tot_nonmiss=sum(!is.na(pred_purchase)),
+              obs_purchase=sum(choice, na.rm=TRUE),
+              pred_purchase=sum(pred_purchase, na.rm=TRUE),
+              tot_count=n())
   
+  return(treated.dat)
+}

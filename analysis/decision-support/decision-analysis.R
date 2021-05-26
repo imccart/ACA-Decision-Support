@@ -4,7 +4,7 @@
 ## Title:         Decision Assistance and Health Insurance Choice
 ## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/28/2019
-## Date Edited:   4/28/2021
+## Date Edited:   5/18/2021
 ## Description:   This file calls all scripts necessary for estimating the effect of decision assistance on 
 ##                health insurance choice.
 
@@ -12,9 +12,9 @@
 # Preliminaries -----------------------------------------------------------
 if (!require("pacman")) renv::install('pacman')
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stargazer, knitr, kableExtra,
-               lfe, modelr, mclogit, bookdown, future, parallel, nnet, mixl, fixest,
+               lfe, modelr, mclogit, bookdown, parallel, nnet, mixl, fixest,
                future.apply, gtsummary, emo, twilio, SAScii, data.table, scales, mlogit,
-               modelsummary, cobalt, WeightIt)
+               modelsummary, cobalt, WeightIt, broom, tidymodels)
 
 source('paths.R')
 source(paste0(common,"/common_functions.R"))
@@ -137,13 +137,13 @@ hh.clean <- hh.full %>%
   filter(is.na(previous_plan_offered))
   
 
-
 # Run analysis scripts ----------------------------------------------------
 
 source('analysis/decision-support/_SummaryStats.R')
 source('analysis/decision-support/_DominatedChoices.R')
 
-rm("hh.full","households","max.age","language","hh.language","panel.length")
+rm("hh.full","households","max.age","language","hh.language","panel.length",
+   "hh.nest","mod.full","bs.hh.data","sim.bs")
 source('analysis/decision-support/_ChoiceModel.R')
 source('analysis/decision-support/_ChoiceSummary.R')
 
