@@ -326,10 +326,10 @@ final.sum.stats <- mean.stats.assist %>%
   left_join(mean.stats.unassist, by="name") %>%
   left_join(mean.stats.all, by="name") %>%
   mutate(name=case_when(
-    name=="FPL_low" ~ "< 138%",
+    name=="FPL_low" ~ "below 138%",
     name=="FPL_250" ~ "between 138 and 250%",
     name=="FPL_400" ~ "between 250 and 400%",
-    name=="FPL_high" ~ "> 400%",
+    name=="FPL_high" ~ "above 400%",
     name=="BlueShield" ~ "Blue Shield",
     name=="HealthNet" ~ "Health Net",
     name=="any_agent" ~ "Agent or Broker",
@@ -343,6 +343,7 @@ final.sum.stats <- mean.stats.assist %>%
     TRUE ~ name
   ))
 
+options(knitr.kable.NA = '')
 kable(final.sum.stats, format="latex",
       col.names = c("Variable","Assisted","Unassisted","Overall"),
       digits=c(0,2,2,2),
