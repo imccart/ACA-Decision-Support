@@ -11,8 +11,8 @@
 dchoice.est <- function(d, oos, t, r) {
 
   ## Terms for estimation
-  all_covars=c("premium", "silver")
-  ins.offer <- c(0,0)
+  all_covars=c("premium", "silver","hh_size_prem","AV")
+  ins.offer <- c(0,0,0,0)
   cml.share <- 0
   tot.choice <- sum(d$choice==1)
   ins.offer[1] <- sum(d$Anthem==1 & d$choice==1)/tot.choice

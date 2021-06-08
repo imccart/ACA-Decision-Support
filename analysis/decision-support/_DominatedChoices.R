@@ -79,17 +79,12 @@ mod.full <- hh.nest %>%
 
 ## bootstrap standard errors
 max.boot <- 200
-bs.hh.data <- bootstraps(hh.nest, times=max.boot)
-
 bootsrp.dom <- function(j) {
-  bs.dom.dat <- analysis(bs.hh.data$splits[[j]]) %>% 
-    unnest(data) %>%
-    nest(-c(region,year))
-  
-  bs.dom.run <- bs.dom.dat %>%
-    mutate(data.est=map(data,~filter(., assisted==0)),
-           data.oos=map(data,~filter(., assisted==1))) %>%
-    select(-data) %>%
+  bs.dom.run <- hh.nest %>%
+    mutate(data.bs=map(data, ~slice_sample(.x, n=nrow(.x), replace=TRUE)),
+           data.est=map(data.bs,~filter(., assisted==0)),
+           data.oos=map(data.bs,~filter(., assisted==1))) %>%
+    select(-c(data, data.bs)) %>%
     mutate( regs = map(data.est, 
                        ~feglm(dominated_choice ~ english + spanish +
                                 FPL + perc_0to17 + perc_18to25 + perc_26to34 + perc_35to44 +

@@ -12,26 +12,42 @@ dchoice.bs <- function(t, r) {
   est.data <- get(paste0("est.data.",r,".",t))
   oos.data <- get(paste0("oos.data.",r,".",t))
 
+
+  # oos.data <- oos.data %>%
+  #   inner_join(est.data.bs %>% distinct(plan_name),
+  #              by="plan_name") %>%
+  #   group_by(household_number) %>%
+  #   mutate(any_choice=max(choice)) %>%
+  #   filter(any_choice==1) %>%
+  #   ungroup() %>%
+  #   select(-any_choice)
+  
   ## Set up model and starting values
   all_covars <- as.list(bs.starting %>% filter(region==r, year==t, variable!="iv") %>% select(variable))$variable
-  mclogit.formula <- formula(paste("cbind(choice, household_number) ~", paste(all_covars, collapse=" + ")))
-  beta_initial <- as.list(bs.starting %>% filter(region==r, year==t, variable!="iv") %>% select(estimate))$estimate
-
-  nested.data <- mlogit.data(est.data, choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
   nested.formula <- formula(paste("choice ~", paste(all_covars, collapse=" + "),"| 0")) 
-    
+  beta_initial <- as.list(bs.starting %>% filter(region==r, year==t, variable!="iv") %>% select(estimate))$estimate
+  
   ## Estimate model and store results
-  test <- is.error(mlogit(nested.formula, data=nested.data, weights=ipweight, 
-                          nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE, start=beta_initial))
-  if (test==FALSE) {
-    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight,
-                           nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE,
-                           start=beta_initial)        
-  } else {
-    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight,
-                           nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)        
+  test <- TRUE
+  while (test==TRUE) {
+    est.data.bs <- est.data %>%
+      nest(-household_number)
+        
+    est.data.bs <- slice_sample(est.data.bs, n=nrow(est.data.bs), replace=TRUE) %>%
+      mutate(household_number=cur_group_rows()) %>%
+      unnest(data)
+
+    nested.data <- mlogit.data(est.data.bs, choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
+    test <- is.error(mlogit(nested.formula, data=nested.data, weights=ipweight, 
+                            nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE, start=beta_initial))
+    if (test==FALSE) {
+      nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight,
+                             nests=list(insured=nest.in, uninsured=nest.out), un.nest.el=TRUE)
+    } else {
+      test <- TRUE
+    }
   }
-      
+   
   coef.name <- as_tibble(names(nested.logit$coefficients)) %>%
     rename("variable"=value)
   coef.est <- as_tibble(nested.logit$coefficients) %>%

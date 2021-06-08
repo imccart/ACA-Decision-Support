@@ -8,10 +8,10 @@
 
 # Estimation function -----------------------------------------------------
 
-dchoice.reg <- function(d, names) {
+dchoice.reg <- function(d, nest.names) {
 
   ## Terms for estimation
-  all_covars=c("premium", "silver")
+  all_covars=c("premium", "silver", "AV")
   ins.offer <- c(0,0)
   cml.share <- 0
   tot.choice <- sum(d$choice==1)
@@ -53,40 +53,15 @@ dchoice.reg <- function(d, names) {
   
   ## Find initial values from logit and apply to nested logit
   logit.start <- glm(logit.formula, data=d, family="binomial")
-  test <- is.error(mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=names, uninsured="Uninsured"), un.nest.el=TRUE))
+  test <- is.error(mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=nest.names, uninsured="Uninsured"), un.nest.el=TRUE))
   if (test==FALSE) {
-    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=names, uninsured="Uninsured"), un.nest.el=TRUE)
+    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=nest.names, uninsured="Uninsured"), un.nest.el=TRUE)
   } else {
-    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=names, uninsured="Uninsured"), un.nest.el=TRUE,
+    nested.logit <- mlogit(nested.formula, data=nested.data, weights=ipweight, nests=list(insured=nest.names, uninsured="Uninsured"), un.nest.el=TRUE,
                            start=logit.start$coefficients[2:length(logit.start$coefficients)])    
   }
 
   ## Finalize data for output
   return(nested.logit)
         
-}
-  
-dchoice.pred <- function(data, regcoef) {
-  
-  ## Out of sample predictions (predicted values for treated group)
-  oos.nest <- mlogit.data(data, choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
-  oos <- data %>%
-    filter(assisted==0)
-  
-  nested.pred <- predict(regcoef, newdata=oos.nest)  
-  return(nested.pred)
-}  
-  
-  
-  nested.pred <- as_tibble(nested.pred, rownames="household_number") %>% mutate(household_number=as.numeric(household_number))
-  nested.pred <- nested.pred %>% pivot_longer(!household_number, names_to="plan_name", values_to="pred_purchase")
-  treated.dat <- oos %>%
-    left_join(nested.pred, by=c("household_number", "plan_name")) %>%
-    group_by(plan_name) %>% 
-    summarize(tot_nonmiss=sum(!is.na(pred_purchase)),
-              obs_purchase=sum(choice, na.rm=TRUE),
-              pred_purchase=sum(pred_purchase, na.rm=TRUE),
-              tot_count=n())
-  
-  return(treated.dat)
 }

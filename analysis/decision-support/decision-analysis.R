@@ -4,7 +4,7 @@
 ## Title:         Decision Assistance and Health Insurance Choice
 ## Author:        Ian McCarthy & Evan Saltzman
 ## Date Created:  10/28/2019
-## Date Edited:   5/18/2021
+## Date Edited:   6/1/2021
 ## Description:   This file calls all scripts necessary for estimating the effect of decision assistance on 
 ##                health insurance choice.
 
@@ -140,10 +140,10 @@ hh.clean <- hh.full %>%
 # Run analysis scripts ----------------------------------------------------
 
 source('analysis/decision-support/_SummaryStats.R')
-source('analysis/decision-support/_DominatedChoices.R')
+#source('analysis/decision-support/_DominatedChoices.R')
 
 rm("hh.full","households","max.age","language","hh.language","panel.length",
-   "hh.nest","mod.full","bs.hh.data","sim.bs")
+   "hh.nest","mod.full", "sim.bs")
 source('analysis/decision-support/_ChoiceModel.R')
 source('analysis/decision-support/_ChoiceSummary.R')
 

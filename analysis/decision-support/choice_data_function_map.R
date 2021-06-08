@@ -216,7 +216,7 @@ choice.data.fnc2 <- function(plans, hhs) {
     mutate(hh_count=seq(n())) %>%
     filter(hh_count==1) %>%
     select(household_number) %>% ungroup()
-  sample.hh.oos <- sample_frac(unique.hh.oos, size=0.2, replace=FALSE)
+  sample.hh.oos <- sample_frac(unique.hh.oos, size=0.15, replace=FALSE)
   
     
   ## Final data

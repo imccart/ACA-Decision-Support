@@ -239,9 +239,118 @@ ggsave("figures/cov_balance.png")
 
 summary(panel.length$year_obs)
 mean.dom.choice <- mean(hh.clean$dominated_choice, na.rm=T)
-tot.enroll <- sum(enrollee.count.all$enroll_count)*1000
-tot.enroll.new <- sum(enrollee.count.new$enroll_count)*1000
-unique.enroll <- nrow(hh.full %>% distinct(household_id))
+tot.enroll <- sum(enrollee.count.all$enroll_count)
+tot.enroll.new <- sum(enrollee.count.new$enroll_count)
 first.year <- min(enrollee.count$year)
 last.year <- max(enrollee.count$year)
+
+
+
+# # Summary tables ----------------------------------------------------------
+
+## household summary statistics
+sum.stats.data <- hh.full %>% ungroup() %>%
+  mutate(FPL_low=if_else(FPL_bracket=="138orless",1,0),
+         FPL_250=if_else(FPL_bracket=="138to250",1,0),
+         FPL_400=if_else(FPL_bracket=="250to400",1,0),
+         FPL_high=if_else(FPL_bracket=="400ormore",1,0),
+         Kaiser=if_else(insurer=="Kaiser",1,0),
+         Anthem=if_else(insurer=="Anthem",1,0),
+         BlueShield=if_else(insurer=="Blue_Shield",1,0),
+         HealthNet=if_else(insurer=="Health_Net",1,0),
+         Other=if_else(insurer %in% c("Kaiser","Anthem","Blue_Shield","Health_Net"),0,1),
+         Bronze=if_else(metal=="Bronze",1,0),
+         Silver=if_else(metal=="Silver",1,0),
+         Gold=if_else(metal=="Gold",1,0),         
+         Platinum=if_else(metal=="Platinum",1,0),
+         Catastrophic=if_else(metal=="Catastrophic",1,0),
+         HMO=if_else(plan_network_type=="HMO",1,0),
+         PPO=if_else(plan_network_type=="PPO",1,0),
+         EPO=if_else(plan_network_type=="EPO",1,0),
+         HSP=if_else(plan_network_type=="HSP",1,0)) %>%
+  select(starts_with("FPL_"),Kaiser, Anthem, BlueShield, HealthNet, Other, Bronze, Silver, Gold, Platinum, Catastrophic, HMO, PPO, EPO, HSP,
+         assisted, navigator, any_agent, household_size, num_children_subject, perc_black, perc_hispanic, perc_white)
+  
+
+sum.stats.assist <- sum.stats.data %>% filter(assisted==1) %>%
+  summarize(across(c("FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
+                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP",
+                     "household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white", "navigator", "any_agent"),
+               list(Mean=mean, N=~n(),
+                    q1=~quantile(., probs=0.10, na.rm=TRUE),
+                    q9=~quantile(., probs=0.90, na.rm=TRUE)),
+            na.rm=TRUE,
+            .names="{col}_{fn}"))
+
+sum.stats.unassist <- sum.stats.data %>% filter(assisted==0) %>%
+  summarize(across(c("FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
+                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP",
+                     "household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white"),
+                   list(Mean=mean, N=~n(),
+                        q1=~quantile(., probs=0.10, na.rm=TRUE),
+                        q9=~quantile(., probs=0.90, na.rm=TRUE)),
+                   na.rm=TRUE,
+                   .names="{col}_{fn}"))
+
+sum.stats.all <- sum.stats.data %>% filter(assisted==0) %>%
+  summarize(across(c("FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
+                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP",
+                     "household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white"),
+                   list(Mean=mean, N=~n(),
+                        q1=~quantile(., probs=0.10, na.rm=TRUE),
+                        q9=~quantile(., probs=0.90, na.rm=TRUE)),
+                   na.rm=TRUE,
+                   .names="{col}_{fn}"))
+
+tot.count <- nrow(sum.stats.data)/1000000
+assist.count <- nrow(sum.stats.data %>% filter(assisted==1))/1000000
+unassist.count <- nrow(sum.stats.data %>% filter(assisted==0))/1000000
+mean.stats.all <- sum.stats.all %>% select(ends_with("_Mean")) %>%
+  pivot_longer(cols=ends_with("_Mean"),
+               values_to="Overall") %>%
+  mutate(name=str_remove(name,"_Mean")) %>%
+  bind_rows(as_tibble(tot.count) %>% mutate(name="Obs") %>% rename(Overall=value))
+mean.stats.assist <- sum.stats.assist %>% select(ends_with("_Mean")) %>%
+  pivot_longer(cols=ends_with("_Mean"),
+               values_to="Assisted") %>%
+  mutate(name=str_remove(name,"_Mean")) %>%
+  bind_rows(as_tibble(assist.count) %>% mutate(name="Obs") %>% rename(Assisted=value))  
+mean.stats.unassist <- sum.stats.unassist %>% select(ends_with("_Mean")) %>%
+  pivot_longer(cols=ends_with("_Mean"),
+               values_to="Unassisted") %>%
+  mutate(name=str_remove(name,"_Mean")) %>%
+  bind_rows(as_tibble(unassist.count) %>% mutate(name="Obs") %>% rename(Unassisted=value))  
+
+
+final.sum.stats <- mean.stats.assist %>%
+  left_join(mean.stats.unassist, by="name") %>%
+  left_join(mean.stats.all, by="name") %>%
+  mutate(name=case_when(
+    name=="FPL_low" ~ "< 138%",
+    name=="FPL_250" ~ "between 138 and 250%",
+    name=="FPL_400" ~ "between 250 and 400%",
+    name=="FPL_high" ~ "> 400%",
+    name=="BlueShield" ~ "Blue Shield",
+    name=="HealthNet" ~ "Health Net",
+    name=="any_agent" ~ "Agent or Broker",
+    name=="navigator" ~ "Navigator",
+    name=="perc_black" ~ "Percent Black",
+    name=="perc_hispanic" ~ "Percent Hispanic",
+    name=="perc_white" ~ "Percent White",
+    name=="household_size" ~ "Household Size",
+    name=="num_children_subject" ~ "No. of Children",
+    name=="Obs" ~ "Total HHs (millions)",
+    TRUE ~ name
+  ))
+
+kable(final.sum.stats, format="latex",
+      col.names = c("Variable","Assisted","Unassisted","Overall"),
+      digits=c(0,2,2,2),
+      booktabs=T) %>%
+  pack_rows("Income relative to FPL", 1, 4) %>%
+  pack_rows("Insurer",5, 9) %>%
+  pack_rows("Metal Tier",10, 14) %>%
+  pack_rows("Network Type", 15, 18) %>%
+  pack_rows("Household Characteristics", 19, 26) %>%
+  save_kable("tables/summary_stats.tex")
 
