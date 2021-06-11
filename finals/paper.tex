@@ -25,7 +25,7 @@
 \begin{document}
 \title{Decision Assistance and Steering in Health Insurance}
 \author{Ian McCarthy \& Evan Saltzman}
-\date{May 2021}
+\date{June 2021}
 \maketitle
 
 \vspace{-2ex}
@@ -86,13 +86,14 @@ There are two forms of formal decision assistance available to potential enrolle
 A navigator is essentially a public employee available to help potential enrollees better understand their insurance options. Access to navigators has been shown to have a particularly large effect on Medicaid enrollment \citep{myerson2019, sommers2015, aizer2003}. Relatedly, navigators tend to work with households of lower incomes, currently uninsured, and non-native english speakers.
 
 
-
-
 \section{Data}
 \label{sec:data}
 We have detailed individual and household-level administrative data from California's ACA exchange (i.e., Covered California) from 2014-2019. The data indicate each enrollee's selected plan and key demographic information, including age, income, county of residence, subsidy eligibility, and household composition. We also collect data on plan characteristics and rate filings, including the plan premium, metal tier, cost sharing requirements (e.g., deductible, coinsurance, and maximum out-of-pocket limit), and network type (e.g., HMO, PPO). Demographic and plan characteristics allow the construction of each household's menu of plan choices and household-specific premiums, $p_{ij}$. Individual and household identifiers allow consumers to be grouped into household units and tracked across time.\footnote{To form the universe of \textit{potential} exchange consumers, we supplement the Covered California data with data from the American Community Survey (ACS). From the full ACS data, we exclude individuals enrolled in or eligible for another source of insurance coverage as well as those ineligible to purchase insurance on the exchanges. Details of ACS data are described in the supplemental appendix.} 
 
-Our final data consist of 8.3 million total annual enrollments from 2014-2019. Of these, 4.5 million are newly enrolled (e.g., not enrolled in any California exchange plan in the prior year). Table~\ref{tab:summary-stats} displays summary statistics for Covered California households, separately between those that used and did not use decision assistance. The silver tier is the most commonly selected option because consumers eligible for cost sharing reductions (CSRs) must choose a silver plan to receive CSRs.  Approximately 68 percent of California enrollees and 61 percent of Washington enrollees are eligible for CSRs, while 91 percent of California enrollees and 85 percent of Washington enrollees are eligible for premium subsidies.  The proportion of consumers exempt from the individual mandate is small, but is notably higher among those who are uninsured.  The uninsured rate is substantially higher among young adults and males in both states. Individuals with incomes between 250 and 400 percent of FPL, who receive relatively small subsidies, and those with incomes above 400 percent of FPL, who are ineligible for subsidies, make up a relatively large share of the uninsured population.
+Our final data consist of 8.3 million total households from 2014-2019. Of these, 4.5 million were not previously enrolled in any Covered California plan in the prior year. Table~\ref{tab:summary-stats} displays summary statistics for all households in our data. Since the key independent variable throughout much of our analysis is whether a household used some form of decision assistance, we present summary statistics separately between those that used and did not use decision assistance. 
+
+We see from Table~\ref{tab:summary-stats} that enrollees using decision assistance are of lower income and larger household size. Among types of plans purchased, we see little difference between those with and without decision assistance, with the exception of Kaiser plans for which individuals using decision assistance are less likely to purchase. Overall, the silver tier is the most commonly selected option, and this is particularly true for those using decision assistance. Enrollees with decision assistance are also less likely to select an HMO and relatively more likely to select a PPO. Finally, among those using some form of decision assistance, about 70\% of households used a private agent or broker while the remaining 30\% used a public navigator.
+
 
 \section{Decision Assistance and Plan Choice}
 \label{sec:causal}
@@ -103,33 +104,366 @@ We model health insurance purchasing with a nested logit discrete choice model, 
 
 For our nested logit discrete choice model, we assume that household $i$ chooses the plan $j$ that maximizes their utility,
 \begin{equation}
-u_{ij} = \alpha_{i}p_{ij} + \beta x_{j} + \gamma d_{i} + \xi_{j} + \varepsilon_{ij}, \label{eq:utility}
+u_{ij} = \alpha_{i}p_{ij} + \beta x_{j} + \gamma d_{i} + \xi_{j} + \varepsilon_{ij}, 
+\label{eqn:utility}
 \end{equation}
-where $p_{ij}$ denotes the premium for plan $j$, $x_{j}$ denotes a vector of product characteristics, $d_{i}$ denotes a vector of household characteristics, $\xi_{j}$ captures unobserved product characteristics, and $\varepsilon_{ij}$ is an error term assumed to follow a type I extreme value distribution. We allow for heterogenities in price elasticities across households by parameterizing $\alpha_{i}$ in Equation \eqref{eq:utility}, $\alpha_{i} = \alpha + \theta d_{i}.$ In our estimation, this amounts to including a full set of interactions between $d_{i}$ and $p_{ij}$.
+where $p_{ij}$ denotes the premium for plan $j$, $x_{j}$ denotes a vector of product characteristics, $d_{i}$ denotes a vector of household characteristics, $\xi_{j}$ captures unobserved product characteristics, and $\varepsilon_{ij}$ is an error term assumed to follow a type I extreme value distribution. We allow for heterogenities in price elasticities across households by parameterizing $\alpha_{i}$ in Equation~\eqref{eqn:utility}, $\alpha_{i} = \alpha + \theta d_{i}.$ In our estimation, this amounts to including interactions between $d_{i}$ and $p_{ij}$.
 
-this estimator proceeds in four steps: 1) estimate a logit regression of decision assistance, the predicted probabilities of which enter as weights in the second stage; 2) estimate a weighted nested logit model of plan choice, limiting the sample to those observed to \textbf{not} have used any form of decision assistance; 3) use the results of our choice model to predict the counterfactual outcome of plan choice among those that \textbf{did} use some form of decision assistance; and 4) take the difference in predicted plan choices versus observed plan choices, conditional on receiving assistance. 
+Using the nested logit model in Equation~\eqref{eqn:utility}, our goal is to estimate the average treatment effect on the treated (ATT), which in our case reflects the average treatment effect among those using some form of decision assistance. To allow for general heterogeneous treatment effects, we estimate the ATT with a four-step process: 
+\begin{enumerate}
+    \item Estimate the nested logit model of plan choice from Equation~\eqref{eqn:utility}, limiting the sample to those observed to \textbf{not} have used any form of decision assistance. We estimate Equation~\eqref{eqn:utility} separately for each year and region, implicitly allowing for a full set of region/year interactions among all covariates. For this reason, we select a relatively small set of covariates, including household-specific premiums, the interaction between premiums and household size, the actuarial value of the plan, the metal tier, indicators for network type (HMO or PPO), and insurer fixed effects. We then obtain a set of coefficient estimates, $\hat{\theta} = \{\hat{\alpha}, \hat{\beta}, \hat{\gamma}, \hat{\xi} \}$.\footnote{These coefficient estimates differ by region and year, but we supress that notation for brevity.}
+
+    \item Use $\hat{\theta}$ to form the predicted counterfactual, $\widehat{Pr[Y_{ij}^{0} | \text{Assistance}]}$. In other words, we use the results of our choice model, estimated only among those without decision assistance, to predict the counterfactual outcome of plan choice among those that \textbf{did} use some form of decision assistance.
+
+    \item Sum the predicted probabilities across individuals, $$\widehat{N_{j}^{0}} = \sum_{ i \in \Omega} \widehat{Pr[Y_{ij}^{0} | \text{Assistance}]},$$ where $\Omega$ denotes the set of all enrollees that used decision assistance. Among such enrollees, this reflects the predicted number of enrollments if enrollees had not used any assistance.
+    
+    \item Sum the observed number of enrollments, $N_{j}^{1}$, and take the difference between this and the counterfactual prediction,
+    \begin{equation}
+        ATT_{j} = \underbrace{N^{1}_{j}}_{Observed} - \underbrace{\widehat{N_{j}^{0}}}_{Predicted}.
+    \label{eqn:att}
+    \end{equation}
+\end{enumerate}
+
+Interpreting Equation~\eqref{eqn:att} as an estimate of the ATT assumes that individuals receiving decision assistance do not seek assistance due to some unobserved factors that also affect their plan choice. Conditional on household characteristics as well as insurer fixed effects, (implicitly) interacted with a full set of region and year fixed effects, we argue that this assumption is plausible; however, our estimation strategy employs untreated households (i.e., those without decision assistance) to predict counterfactual choices for treated households and therefore requires sufficient balance between treated and untreated households. As is evident from Table~\ref{tab:summary-stats}, there is reason to suspect that such balance does not hold in our data.
+
+To ensure balance among observed covariates, we employ an augmented inverse propensity weighted regression estimate \cite{wooldridge2010}, in which the weights in the nested logit estimation derive from a preliminary logit regression of decision assistance status for each household. The outcome in this preliminary regression is an indicator variable, set to one if a household used decision assistance (i.e., the treatment group) and 0 otherwise (i.e., the control group). Denoting the resulting predicted probability of decision assistance by $\hat{p}_{i}$, we then assign a weight of $\frac{\hat{p}_{i}}{1-\hat{p}_{i}}$ to each observation in the control group and proceed with step (1) above using these weights in the nested logit regression. Conceptually, this approach assigns more weight to households without decision assistance that are ``most similar'' to households that use decision assistance.
+
 
 \subsection{Results}
 \label{subsec:causal-results}
 
-Interpreting our results as an estimate of the ATT assumes that individuals receiving decision assistance do not seek assistance due to some unobserved factors that also affect their plan choice. Conditional on household characteristics as well as insurer fixed effects, interacted with a full set of region and year fixed effects, we argue that this assumption is plausible. 
+Figure~\ref{fig:ps-balance} presents the resulting propensity scores from our preliminary logit regression of decision assistance against observable household demographics. As is evident from the figure, we observe substantial overlap in propensity scores between the treated and control groups. In Figure~\ref{fig:cov-balance}, we present a comparison of observable household characteristics between the treatment and control groups. The hollow circles in Figure~\ref{fig:cov-balance} reflect the unadjusted differences in means, while the solid circles reflect the difference in means when weighting households. Weights for treated households are set to 1, and weights for untreated households are set to  $\frac{\hat{p}_{i}}{1-\hat{p}_{i}}$ based on the preliminary logistic regression.  We see from Figure~\ref{fig:cov-balance} that our treated and control groups are well-balanced after weighting.
+
+
+
 
 
 \section{Dominated Choices}
 \label{sec:dominated}
-As a complementary empirical analysis, we identify specific instances in which the observed plan choice is dominated by some other plan in an individual's choice set, and we estimate the effects of decision assistance on the probability of making such a choice. For example, Gold and Platinum tier plans are dominated for any household that is eligible for cost-sharing subsidies and with incomes below 150\% of the federal poverty level. We estimate the effect of decision assistance on dominated choices with a linear probability model, allowing for year, insurer, and region fixed effects.
+The results in Section~\ref{subsec:causal-results} reveal large effects of decision assistance on plan choice; however, it is not clear from those results whether decision assistance \textit{improves} plan choice or simply reallocates households into different, perhaps worse, plans. 
+
+we identify specific instances in which the observed plan choice is dominated by some other plan in an individual's choice set, and we estimate the effects of decision assistance on the probability of making such a choice. For example, Gold and Platinum tier plans are dominated for any household that is eligible for cost-sharing subsidies and with incomes below 150\% of the federal poverty level. We estimate the effect of decision assistance on dominated choices with a linear probability model, allowing for year, insurer, and region fixed effects.
 
 
 \section{Welfare and Insurer Steering}
 \label{sec:steering}
 
-
-\subsection{Model of Commissions and Steering}
+\subsection{Model}
 \label{subsec:steering-model}
 
+Consider a two-stage  game where  (1) firms set premiums and commissions simultaneously to maximize their expected profit and (2) consumers select a plan to maximize their expected utility. In the following three subsections, we detail how we (1) model the decisions of firms; (2) model the decisions of consumers; and (3) find the model equilibrium.  
 
-\subsection{Structural Estimation}
-\label{subsec:steering-methods}
+Given our available data, we do not explicitly model the actions of individual insurance agents.  However, we do model how firms use agent compensation to steer an agent's clients to their plans.  Our approach assumes that the consumer's decision to seek agent assistance is independent of the firms' commission levels.  This identifying assumption is valid if commissions incentivize agents to recommend certain plans to their clients, but do not induce agents to change advertising levels or marketing efforts to  seek new clients. Advertising and marketing by both insurers and agents are tightly regulated, particularly in Covered California.  We therefore believe our identifying assumption is relatively  innocuous.   
+
+\subsubsection{Firms Set Premiums and Commissions}
+
+\paragraph{Defining Firm Decision Variables}
+
+Firms set premiums and commissions to maximize their expected profit.  Let $p_{jmt}$ be the base premium decision for each plan $j$ sold in market $m$ in period $t$ and the \textit{commission decision} $n_{gjt}$ 
+
+   
+	\vspace{-0.4in}		
+		\singlespacing
+		
+				\begin{eqnarray*}
+	n_{gjt}  \equiv \begin{cases} 
+		\delta_{gjt} & \mathrm{\% \,\, commission} \\		
+		\eta_{gjt} & \mathrm{\$ \,\, commission} \\
+		0 & \mathrm{o/w}
+   \end{cases}
+	\end{eqnarray*}		   
+   
+
+\doublespacing
+  
+
+\noindent for each plan $j$ sold at time $t$ with renewal status $g$ (i.e., new or existing customer). Agents are either paid a percentage $\delta_{gjt}$  of the consumer's unsubsidized premium  or a flat amount $\eta_{gjt}$ that is independent of the premium.  We assume the firm's decision to pay a percentage commission or flat commission is exogenous because switching agent compensation methods is costly.  The only firm that switched between compensation methods during our six-year study timeframe was Health Net following its acquisition by Centene. The \textit{commission paid} to household $i$'s insurance agent is
+
+
+		\vspace{-0.4in}		
+		\singlespacing			
+		
+			\begin{eqnarray*}
+	\eta_{gijt}(\textit{p},\textit{n})  \equiv \begin{cases} 
+		n_{gjt} \left(\sigma_{it}p_{jmt}\right) & \mathrm{\% \,\, commission} \\		
+		n_{gjt} & \mathrm{\$ \,\, commission}
+   \end{cases}
+	\end{eqnarray*}
+
+\doublespacing
+
+\noindent where $\textit{p} = {\bf p}_t$ is the vector of plan base premiums set by all insurers in each market in year $t$, $\textit{n} = {\bf n}_t$ is the vector of commission decision variables in period $t$, and the household's (unsubsidized) premium is the product of the household's rating factor $\sigma_{it}$  and the plan's base premium $p_{jmt}$. In California, the rating factor can vary by age and geographic residence of the household's members.\footnote{The ACA also permits rating by tobacco usage, but California prohibits tobacco rating.}  Insurers can charge a 64-year-old up to 3 times as much as a 21-year-old. Figure~\ref{rating_area_partitions} shows the partition of California into rating areas.  In each rating area,  an insurer's premium must be the same for all consumers of the same age. Total commissions paid by firm $f$  are		
+	
+	\vspace{-0.2in}		
+	
+		$$
+		\mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) = \sum_{g \in G, i \in I, m\in M, k \in J_{fmt}} \left( \mathbb{I}_{n,i,t} \right)  q_{ikt}(\textit{p},\textit{n};\boldsymbol{\beta}) \eta_{gikt}(\textit{p},\textit{n})
+		$$	
+	
+\noindent where $\mathbb{I}_{n,i,t}$ indicates whether household $i$ is assisted by an agent in year $t$, $q_{ikt}(\cdot)$ is the probability household $i$ chooses plan $k$ at time $t$, and $J_{fmt}$ is the set of plans offered by firm $f$ in market $m$ at time $t$.  The model parameters $\boldsymbol{\theta} \equiv (\boldsymbol{\beta},\boldsymbol{\gamma},\boldsymbol{\mu})$, where $\boldsymbol{\beta}$ are the demand parameters, $\boldsymbol{\gamma}$ are the risk score parameters, and $\boldsymbol{\mu}$ are the average claims parameters.
+
+\begin{figure}[htbp]
+\caption{Premium Rating Regions in California}
+\label{rating_area_partitions}
+\centering
+\includegraphics[scale=.45]{finals/pics/CA_Rating_Regions2.jpg}	
+
+\begin{footnotesize}
+ \begin{flushleft}
+Notes: Figure shows the premium rating regions in the California exchange \citep{CARATE2016}. California's 58 counties are divided into 19 rating areas. 
+\end{flushleft}
+\end{footnotesize}
+
+\end{figure}  
+ 
+ 
+\paragraph{Calculating Risk Adjustment Transfers} 
+ 
+We now discuss the ACA's risk adjustment program, which directly affects firm profit. \citet{Pope2014} derive the ACA risk adjustment transfer formula.\footnote{We start with \citet{Pope2014}'s transfer formula as derived in their first appendix, which allows plans to vary only by their actuarial values (and not by differences in firm efficiency, geographic costs, allowable rating factors, or moral hazard).  We start with this formula because we want to capture  all differences in expected risk, except for cost sharing and any associated moral hazard, in the plan's risk score (i.e., cost sharing and moral hazard are addressed through the utilization share).  In contrast, the plan liability risk score   $PLRS_j$ as defined in \citet{Pope2014}'s second appendix does not account for certain differences such as variation in geographic cost.  Instead, \citet{Pope2014} account for these differences by applying factors in the transfer formula.}  In our notation, the per-member per-month risk adjustment transfer $ra_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})$ for plan $j$ is
+
+\vspace{-0.2in}
+
+	$$
+	ra_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) = \left(\frac{r_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})\sum_{m \in M, l \in J_{mt}} q_{lmt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\sum_{m \in M, l \in J_{mt}} r_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) q_{lmt}(\textit{p},\textit{n};\boldsymbol{\beta})}    -     \frac{h_j\sum_{m \in M, l \in J_{mt}} q_{lmt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\sum_{m \in M, l \in J_{mt}} h_l q_{lmt}(\textit{p},\textit{n};\boldsymbol{\beta})}\right)\overline{p}
+	$$
+
+\noindent where $r_{jmt}(\cdot)$ is the plan risk score, $h_j$ is an exogenous expected utilization factor set by regulation that accounts for the plan AV and any associated moral hazard, and $\overline{p}$ is the weighted average premium in the market.  The plan's total risk adjustment transfer $RA_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})$ equals
+
+	\vspace{-0.4in}
+
+	\begin{eqnarray}\label{ra_formula}
+	RA_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &=& ra_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})  q_{jmt}(\textit{p},\textit{n};\boldsymbol{\beta}) \nonumber \\
+	&= & \left[rs_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})  - us_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})  \right] R_t(\textit{p},\textit{n};\boldsymbol{\beta}) 
+	\end{eqnarray}
+
+	\vspace{-0.2in}
+
+\noindent where $rs_{jmt}(\cdot)$ is the plan's ``risk share'' of total claims, $us_{jmt}(\cdot)$ is the plan's ``utilization share'' of total claims, and $R_t(\cdot) = \sum_f R_{ft}(\cdot)$ is total premium revenue across all plans. The total risk adjustment transfer for the firm equals the sum of the risk adjustment transfers for the plans that it sells (i.e., $RA_{ft}(\cdot) = \sum_{m \in M, j \in J_{fmt}} RA_{jmt}(\cdot)$.
+	
+The plan's risk share includes the combined effects of adverse selection, moral hazard, and plan AV, whereas the plan's utilization share only includes the effects of moral hazard and plan AV. Thus, the difference between the risk share and utilization share captures the plan's relative risk due to adverse selection only.   The risk share equals
+
+
+\vspace{-0.1in}
+
+	$$
+	rs_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) = \frac{ r_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) q_{jmt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\sum_{m \in M, l \in J_{mt}}  r_{lmt}(\textit{p},\textit{n};\boldsymbol{\theta}) q_{lmt}(\textit{p},\textit{n};\boldsymbol{\beta})}
+	$$
+
+
+\noindent where $J_{mt}$ is the set of all plans offered in market $m$ and year $t$, and the plan risk score $r_{jmt}(\cdot)$ is a function of enrollee characteristics and the plan AV. We do not directly observe plan risk scores in the insurer rate filing data.  However, we observe all other variables in formula~(\ref{ra_formula}) including each plan's risk adjustment transfer and can therefore solve formula~(\ref{ra_formula}) for the plan risk scores. The plan's utilization share $us_{jmt}(\cdot)$ equals
+
+\vspace{-0.1in}
+
+
+
+	$$
+	us_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) =  \frac{ h_j q_{jmt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\sum_{m \in M, l \in J_{mt}} h_l q_{lmt}(\textit{p},\textit{n};\boldsymbol{\beta})}
+	$$
+
+\noindent A positive difference between the risk share and the utilization share indicates that a plan has high risk relative to its expected utilization and results in the plan receiving a risk adjustment transfer; a negative difference indicates that a plan has low risk relative to its expected utilization and results in the plan paying a risk adjustment transfer.
+
+
+
+ 
+\paragraph{Calculating Variable Profit} 
+ 
+ 
+ Firms choose premiums and commissions to maximize expected variable profit
+
+	\vspace{-0.4in}		
+	\begin{footnotesize}
+
+	\begin{eqnarray}\label{profit}
+	\pi_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) &=&  R_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) -  C_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) - \mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) + RA_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) +  RI_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})  - V_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})  \nonumber \\
+	&=& R_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) - (1 - \iota_{ft}) C_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) - \mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) + RA_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})   - V_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) 
+	\end{eqnarray}
+		
+	\end{footnotesize}
+		
+	\vspace{-0.1in}	
+
+\noindent where $R_{ft}(\cdot)$ is total premium revenue, $C_{ft}(\cdot)$ is total claims, $RI_{ft}(\cdot)$ is reinsurance received, $V_{ft}(\cdot)$  is variable administrative cost (excluding commissions), and $\iota_{ft}$ is the actuarial value of the reinsurance contract (i.e., the expected percentage of claims paid by the reinsurer).  Total commissions paid $\mathcal{C}_{ft}(\cdot)$ and risk adjustment received  $RA_{ft}(\cdot)$ are as above.
+
+
+
+
+
+\subsubsection{Households Choose Plans}
+
+
+Households choose the plan that maximizes their (indirect) utility function
+
+	\vspace{-0.4in}
+
+	
+
+	\begin{eqnarray}\label{demand_model}
+	U_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta}) &\equiv& \beta_{i}^p p_{ijt}(\textit{p}) + \beta_j^{\eta} \eta_{gijt}(\textit{p},\textit{n})   + \beta_i^y y_{ij(t-1)} + x'_{ij}\beta^x + \xi_{j} + \epsilon_{ijt}^d
+	\end{eqnarray}
+	
+	\vspace{-0.1in}		
+	
+
+\noindent where $\textit{p} = {\bf p}_t$ is the vector of plan base premiums set by all insurers in each market in year $t$, $p_{ijt}(\textit{p})$ is household $i$'s premium for plan $j$ in year $t$, $y_{ij(t-1)}$ indicates whether household $i$ chose plan $j$ in the previous year, $x_{ij}$ is a vector of observed product characteristics including the plan AV,  $\xi_{j}$ is a vector of unobserved product characteristics, and $\epsilon_{ijt}^d$ is an error term.  We allow the household's premium parameter $\beta_{i}^p = \beta^p + w'_{it} \phi$ to vary with household characteristics $w_{it}$ and the household's inertia parameter $\beta_i^y = \beta^y +  x'_{ij} \kappa + w'_{it} \nu$ to vary with household and product characteristics. CSRs enter utility equation (\ref{demand_model}) through the plan AV and premium subsidies reduce the household's premium $p_{ijt}(\textit{p})$.   The utility of the outside option $U_{i0t} = \beta_i^p \rho_{it} + \epsilon_{i0t}$, where $\rho_{it}$ is the household's penalty for not having insurance in year $t$. 
+
+
+
+\paragraph{Calculating Household Premiums}
+
+
+Households choose the plan that maximizes their (indirect) utility function
+
+	\vspace{-0.4in}
+
+	
+
+	\begin{eqnarray}\label{demand_model}
+	U_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta}) &\equiv& \beta_{i}^p p_{ijt}(\textit{p}) + \beta_j^{\eta} \eta_{gijt}(\textit{p},\textit{n})  \mathbb{I}_{n,i,t}   + \beta_i^y y_{ij(t-1)} + x'_{ij}\beta^x + \xi_{j} + \epsilon_{ijt}^d
+	\end{eqnarray}
+	
+	\vspace{-0.1in}		
+	
+
+\noindent where $p_{ijt}(\textit{p})$ is household $i$'s (subsidized) premium for plan $j$ in year $t$, $\eta_{gijt}(\textit{p},\textit{n})$ is the commission paid to household $i$'s insurance agent, $y_{ij(t-1)}$ indicates whether household $i$ chose plan $j$ in the previous year, $x_{ij}$ is a vector of observed product characteristics including the plan AV,  $\xi_{j}$ is a vector of unobserved product characteristics, and $\epsilon_{ijt}^d$ is an error term.  CSRs enter utility equation (\ref{demand_model}) through the plan AV and premium subsidies reduce the household's premium $p_{ijt}(\textit{p})$.   The utility of the outside option $U_{i0t} = \beta_i^p \rho_{it} + \epsilon_{i0t}$, where $\rho_{it}$ is the household's penalty for not having insurance in year $t$. 
+
+
+\paragraph{Choice Model Parameters}
+
+We define the vector of demand parameters $\boldsymbol{\beta} \equiv (\beta_i^p,\beta_j^{\eta},\beta_i^y,\beta^x)$ to accommodate heterogeneous consumer preferences.  The household's premium parameter $\beta_{i}^p \equiv \beta^p + w'_{it} \phi$ varies with household characteristics $w_{it}$.  The household's inertia parameter $\beta_i^y = \beta^y +  x'_{ij} \kappa + w'_{it} \nu$ varies with both household and product characteristics. The steering parameter $\beta_j^{\eta}$ captures the degree to which agent compensation steers  an agent's clients to particular plans.  A high value of $\beta_j^{\eta}$ would indicate that agent compensation is effective in steering consumers.   Because smaller firms offer agents considerably higher commissions, we allow the steering parameter to vary with firm size.
+
+
+		
+\paragraph{Calculating Demand}
+
+
+ We assume equation (\ref{demand_model}) is a nested logit model such that the vector of error terms $\epsilon_i$ has the generalized extreme value distribution.  The first nest contains all exchange plans and  the second nest contains only the outside option.  This two-nest structure captures the key observed substitution pattern between the silver tier and the outside option resulting from the ACA's linkage of CSRs to the purchase of silver plans.  Under the assumption that $\epsilon_i$ has the generalized extreme value distribution, the household choice probabilities are 
+
+	\vspace{-0.4in}		
+
+	\begin{eqnarray}\label{choice_probs}
+	q_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta}) &=&  \frac{e^{V_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta})/\lambda}\left(\sum_{j } e^{V_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta})/\lambda}\right)^{\lambda-1}}{1 + \left(\sum_{j} e^{V_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta})/\lambda}\right)^{\lambda}} 
+	\end{eqnarray}
+
+	\vspace{-0.1in}		
+
+
+\noindent where $V_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta}) \equiv \beta_{i}^p p_{ijt}(\textit{p}) + \beta_j^{\eta} \eta_{gijt}(\textit{p},\textit{n})   + \beta_i^y y_{ij(t-1)} + x'_{ij}\beta^x + \xi_{j}$ and $\lambda$ is the nesting parameter. The household choice probabilities in equation~(\ref{choice_probs}) converge to the standard logit choice probabilities when $\lambda \rightarrow 1$.
+
+
+The sensitivity of a subsidized consumer's demand $q_{ijt}(\textit{p})$ to a premium change is given by  
+
+	\vspace{-0.4in}
+
+	\begin{eqnarray*}
+	\frac{\partial q_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\partial p_{jmt}} &=& \sum_{l \in J_{mt}} \frac{ \partial q_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\partial p_{ilt}(\textit{p})}\frac{ \partial p_{ilt}(\textit{p})}{\partial p_{jmt}}
+	\end{eqnarray*}
+
+	\vspace{-0.1in}		
+
+\noindent for all plans $j,k$ in the set of available plans $J_{mt}$.  Assuming a strictly positive subsidy that does not exceed the full, unsubsidized premium, it follows from equation (\ref{cons_premium}) that
+
+	\vspace{-0.4in}
+	\singlespacing
+	
+	\begin{eqnarray}\label{price_partial_formula}
+	 \frac{\partial p_{ilt}(\textit{p})}{\partial p_{jmt}} = \begin{cases} 
+		0 & l=j, j = b \\		
+		\sigma_{it} & l = j, j \neq b \\     
+		-\sigma_{it} & l \neq j, j = b \\
+		0 & l \neq j, j \neq b  
+      
+   \end{cases}
+	\end{eqnarray}
+
+	\doublespacing
+
+	%\vspace{-0.1in}
+
+\noindent For a non-benchmark plan, an infinitesimal premium increase results in consumers paying more for that plan only.  An infinitesimal increase in the benchmark premium does not affect what subsidized consumers pay for the benchmark plan, but reduces what consumers pay for all other plans because of the larger subsidy. The complex relationship between insurer and consumer premiums, endogenous determination of the benchmark premium, and variation in the benchmark plan across consumers due to heterogeneous entry create significant computational challenges for estimation.  We carefully model the endogenous subsidy design despite the high computational cost because of the critical role premium subsidies play in addressing adverse selection.  
+
+
+
+\subsubsection{Equilibrium}
+
+
+Now we find the first-order necessary conditions for a Nash equilibrium.  Differentiating equation (\ref{profit}) with respect to the premium and the commission yields the  first-order conditions  
+
+\vspace{-0.4in}	
+\begin{footnotesize}
+
+	\begin{eqnarray}\label{acara_foc_short}
+	\frac{\partial R_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} + \frac{\partial RA_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} &=& (1-\iota_{ft}) \frac{\partial C_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} + \frac{\partial \mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} + \frac{\partial V_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} \nonumber \\
+	\frac{\partial R_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} + \frac{\partial RA_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} &=& (1-\iota_{ft}) \frac{\partial C_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} + \frac{\partial \mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} + \frac{\partial V_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}}
+	\end{eqnarray}
+
+\end{footnotesize}
+
+	\vspace{-0.1in}	
+
+\noindent for all renewal groups $g$ and markets $m$ in which plan $j$ is offered by the firm in year $t$. In Appendix~\ref{app::model_formulas}, we write every variable in equations~(\ref{profit}) and (\ref{acara_foc_short})  in terms of three estimable variables: (1) household choice probabilities $q_{ijt}(\textit{p},\textit{n};\boldsymbol{\theta})$; (2) plan risk scores $r_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})$; and (3) average claims $c_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta})$.  Household choice probabilities are computed using equation (\ref{choice_probs}).  We calculate plan risk scores as a function of observable enrollee characteristics   and the plan generosity using the estimating equation  
+
+
+\vspace{-0.4in}
+
+	\begin{eqnarray}\label{risk_score_estimation}
+	\ln r_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &=& \sum_{d \in D} \gamma^d s_{djmt}(\textit{p},\textit{n};\boldsymbol{\theta}) + MT'_j \gamma^{MT} + \epsilon_{jmt}^r
+	\end{eqnarray}
+
+\vspace{-0.1in}
+
+\noindent The predicted demographic share $s_{djmt}(\cdot)$ is the share of plan $j$'s enrollment in market $m$ and year $t$ with demographic characteristic $d$, $MT_j$ is a vector metal tier fixed effects,  $\epsilon_{jmt}^r$ is an error term, and the vector of risk score parameters $\boldsymbol{\gamma} = (\gamma^d,\gamma^{MT},\gamma^{n})$. The demographic shares are computed by aggregating the household choice probabilities.   We calculate plan average claims as a function of the plan risk score using the estimating equation 
+
+\vspace{-0.4in}	
+
+	\begin{eqnarray}\label{avg_claims_estimation}
+	\ln c_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &=& \mu^r \ln r_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) + x'_j  \mu^{x}  + \mu^l l_t +   n'_m \mu^{n} + \epsilon_{jmt}^c
+	\end{eqnarray}
+
+\vspace{-0.1in}
+
+\noindent where $r_{jmt}(\cdot)$ is the predicted risk score computed using equation (\ref{risk_score_estimation}), $x_j$ are product characteristics (not including plan AV), $l_t$ is a linear trend, $n'_m$ are market fixed effects, $\epsilon_{jmt}^c$ is an error term, and  $\boldsymbol{\mu} = (\mu^r,\mu^x,\mu^l,\mu^n)$ are the claims parameters. 
+
+
+\subsection{Estimation}\label{subsec:steering-methods}
+
+In this section, we explain how we use the generalized method of moments (GMM) to estimate the parameter vector $\boldsymbol{\theta}$.  We construct four sets of moment conditions: (1) demand moments that match observed choices and predicted household choice probabilities; (2) risk score moments that match observed and predicted plan risk scores; and (3) average claims moments that match observed and predicted plan average claims; and (4) the first-order conditions for profit maximization in equation~\ref{acara_foc_short}.  These moment conditions are summarized below:
+
+	\vspace{-0.4in}
+
+	\begin{eqnarray}\label{moment_conditions}
+	\frac{1}{N^{IJT}} \sum_{i\in I, j \in J, t \in T} \frac{ \chi_{ijt} \partial  \ln  q_{ijt}(\textit{p},\textit{n};\boldsymbol{\beta})}{\partial \boldsymbol{\beta}} &=& {\bf 0} \nonumber \\
+	\frac{1}{N^{JMT}} \sum_{j \in J,m \in M,t \in T} {\bf z}_{jmt}^r(\textit{p},\textit{n};\boldsymbol{\theta}) \left(\ln r_{jmt} - \boldsymbol{\gamma}'   {\bf z}_{jmt}^r(\textit{p},\textit{n};\boldsymbol{\theta}) \right)  &=& {\bf 0} \nonumber  \\ 
+	\frac{1}{N^{JMT}} \sum_{j \in J,m \in M,t \in T} {\bf z}_{jmt}^c(\textit{p},\textit{n};\boldsymbol{\theta}) \left(\ln c_{jmt} - \boldsymbol{\mu}'   {\bf z}_{jmt}^c(\textit{p},\textit{n};\boldsymbol{\theta}) \right)  &=& {\bf 0} \nonumber  \\ 	
+	\frac{1}{N_{jt}^M} \sum_{m \in M} g_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &=& 0,  \hspace{0.3in} \forall j \in J_t,t \in T \nonumber \\
+	\frac{1}{N_{jt}^M} \sum_{m \in M} g'_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &=& 0,  \hspace{0.3in} \forall j \in J_t,t \in T 
+	\end{eqnarray}
+	
+\noindent where $N^{IJT}$ is the number of plans available to all households in all years, $N^{JMT}$ is the number of plans available in all markets and years, $N_{jt}^M$ is the number of markets where plan $j$ is offered in year $t$, $\chi_{ijt}$ indicates whether household $i$ chose plan $j$ at time $t$, $r_{jmt}$ is the observed plan risk score, $c_{jmt}$ is the observed plan average claims, the risk score covariates ${\bf z}_{jmt}^r(\textit{p};\boldsymbol{\beta}) \equiv (s_{djmt}(\textit{p},\boldsymbol{\beta}),MT_j)$, the average claims covariates ${\bf z}_{jmt}^c(\textit{p};\boldsymbol{\theta}) \equiv (\ln r_{jmt}(\textit{p};\boldsymbol{\theta}),x_j,u_t,n_m)$, and the first-order condition values
+
+	\vspace{-0.4in}
+	\begin{footnotesize}
+	\begin{eqnarray*}
+	g_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &\equiv& \frac{\partial R_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} + \frac{\partial RA_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} - (1-\iota_{ft}) \frac{\partial C_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} - \frac{\partial \mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} - \frac{\partial V_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial p_{jmt}} \\
+	g'_{jmt}(\textit{p},\textit{n};\boldsymbol{\theta}) &\equiv& 	\frac{\partial R_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} + \frac{\partial RA_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} - (1-\iota_{ft}) \frac{\partial C_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} - \frac{\partial \mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}} - \frac{\partial V_{ft}(\textit{p},\textit{n};\boldsymbol{\theta})}{\partial n_{gjt}}	
+	\end{eqnarray*}
+	\end{footnotesize}
+
+	\vspace{-0.1in}  	
+	
+\noindent Because model (\ref{moment_conditions}) over-identifies the model parameters, we use two-step feasible GMM to find the values of $\boldsymbol{\theta}$ that minimize the GMM objective $[{\bf m}(\boldsymbol{\theta})]'{\bf W}^{-1}[{\bf m}(\boldsymbol{\theta})]$, where ${\bf m}(\boldsymbol{\theta})$ is the vector of moment values in model (\ref{moment_conditions}) and the optimal weight matrix ${\bf W}$ is a consistent estimate of the variance-covariance matrix of the moment values.  	
+	
+
+A significant estimation challenge is to identify the effect of premiums on household choices (i.e., the parameter $\beta_i^p$).  Several sources of exogenous variation are used to identify the premium parameter $\beta_i^p$, including: (1) exogenous variation in absolute premiums (i.e., relative to the outside option) that results from the phasing-in of the mandate penalty between 2014 and 2016 and zeroing out of the penalty in 2019; (2) exogenous variation in relative premiums (i.e., between plans) that results from kinks in the household premium formula (\ref{cons_premium}).  Because of these kinks, some bronze plans may be ``free'' to low-income consumers if the subsidy exceeds the full premium (i.e., the second-cheapest silver plan available to the consumer may exceed the premium of some bronze plans).   The set of free plans varies by market, time, and consumer characteristics such as income, age, and household composition.  Unobservables at the insurer's discretion such as provider networks and formularies may also be correlated with premiums.  We address this concern by estimating  equation (\ref{demand_model}) with insurer-market fixed effects.  \citet{Ho2014} and \citet{Tebaldi2020} follow a similar approach.  Our estimates are  similar when including insurer-market fixed effects.
+
+We also need to identify the steering parameter in equation~(\ref{choice_probs}).  Unobservables such as customer service, brand image, and other forms of advertising could be correlated with commission payments.   Commission payments may also be correlated with competition in a given market.  We control for these variables by including insurer fixed effects and market fixed effects.  
+
+***NOTE: we still need to deal with the selection issue (i.e., do people who seek agent assistance have different preferences than those who do not).  ***
+
+Another identification challenge is that we lack data on patient medical conditions to predict plan risk scores. Omitting medical conditions may bias estimates of the parameter vector $\gamma^d$.  To address this potential source of bias, we compute predicted demographic shares using the estimated consumer-level choice probabilities from equation (\ref{choice_probs}) instead of the observed demographic shares, which are likely to be endogenous.  Choice model (\ref{choice_probs}) can be interpreted as the first-stage of an IV regression for computing unbiased estimates of plan risk scores.  A similar empirical strategy is widely used in the hospital choice literature to compute measures of hospital market concentration (e.g., \citet{Kessler2000}).  The identifying assumption is that the predicted demographic shares are based on exogenous determinants of consumer plan demand.
+
+A third identification challenge is to obtain an unbiased estimate of the risk score parameter $\mu^r$ to predict plan average claims. We compute predicted plan risk scores using equation (\ref{risk_score_estimation}) instead of the observed plan risk scores, which are likely to be endogenous.   If the ACA risk score perfectly captures plan claims risk, then enrollee characteristics should only affect plan average claims through the plan risk score and not directly affect average claims.  Imperfections in the ACA risk score are reflected in the estimated risk score parameter.  
+
+
 
 \subsection{Welfare Results}
 \label{subsec:steering-results}
@@ -158,7 +492,7 @@ We are also extending our analysis of the differential effects between public de
 \centering
 \footnotesize
 \begin{minipage}[h]{6in}
-\caption[caption]{\textbf{Summary Statistics for Covered California Enrollees}\footnote{Statistics based on the population of Covered California enrollees from 2014-2019.}}
+\caption[caption]{\textbf{Summary Statistics for Covered California Enrollees}\footnote{Statistics based on the population of households enrolled in a Covered California plan at any point from 2014-2019.}}
 \centerline{%
     \input{tables/summary_stats.tex}
 }
@@ -167,14 +501,261 @@ We are also extending our analysis of the differential effects between public de
 \end{table}
 
 
-\begin{figure}[htb]\caption{Count of Enrollees in California Exchange}
+\newpage
+\begin{figure}[htb]
+\caption{\textbf{Count of Enrollees in California Exchange}}
 \centering
- 		\hspace*{-1cm}\includegraphics[scale=.7]{figures/enrollee_count.png}
- 		\begin{minipage}{\textwidth}
-		\bigskip
-			\footnotesize \textsc{Notes:} The coefficients for high ratings are shown with circles, those for middle ratings are shown with triangles, and no reviews are shown with diamonds. The main results are designated in blue along with an indicator for specification ``Main". Various specifications and required minimum number of reviews are also indicated. 
- 		\end{minipage}
- 		\label{figure:SpecCurve}
- \end{figure}
+\begin{minipage}[h]{6in}
+\centerline{%
+    \includegraphics[scale=0.75]{figures/enrollee_count.png}
+}
+\label{fig:enrollee-count}
+\end{minipage}
+\end{figure}
+
+\newpage
+\begin{figure}[htb]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Histogram of Propensity Scores}\footnote{Propensity scores derived from a logistic regression of decision assistance on household characteristics, including the racial and ethnic makeup of the household, age of household members, gender of household members, household size, and household income. Regression analysis is limited to newly enrolled households, although results are comparable when considering all exchange households.}}
+\centerline{%
+    \includegraphics[scale=0.75]{figures/ps_assist_clean.png}
+}
+\label{fig:ps-balance}
+\end{minipage}
+\end{figure}
+
+
+\newpage
+\begin{figure}[htb]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Covariate Balance}\footnote{Standardized mean differences with and without inverse-propensity weighting, limited to newly enrolled households. ``IPW-ATT'' reflects weighted mean differences where treated households receive a weight of 1 and untreated households receive a weight of $p/(1-p)$ and where $p$ denotes the estimated propensity score from a logistic regression of decision assistance on observable household demographics (see Figure~\ref{fig:ps-balance}).}}
+\centerline{%
+    \includegraphics[scale=0.75]{figures/cov_balance.png}
+}
+\label{fig:cov-balance}
+\end{minipage}
+\end{figure}
+
+
+\clearpage
+\vspace{30pt}
+{\centering \textbf{ELECTRONIC APPENDICES -- NOT FOR PRINT PUBLICATION}}
+%\noindent\textbf{\Large{Appendices}}
+\appendix
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+\renewcommand{\thefigure}{A\arabic{figure}}
+
+\section{Constructing the Outside Option}\label{outside_option}
+
+In this study, we model dynamic switching both between plans and into and out of the exchange market (any plan, vs. remaining uninsured) using five years of longitudinal data on exchange customers. Previous studies of the exchanges have treated demand as static, typically merging administrative data on exchange enrollees with survey data such as the American Community Survey (ACS) on the uninsured  to form the universe of potential exchange consumers \citep{Tebaldi2020,Domurat2017,saltzman2019}. In contrast, we form the uninsured population using data on consumers in our Covered California data for years in which they did not have exchange coverage, and using panel survey data on dynamics of consumers' exchange market eligibility. For example, within our data, consumers with exchange coverage in 2015 and 2016 are considered uninsured (the outside option) in 2014, 2017, and 2018, provided they remained eligible for the exchange market. Consumers might lose exchange market eligibility if they gain access to employer-sponsored insurance or public insurance such as Medicaid or Medicare. Because our data do not indicate when enrollees lose exchange market eligibility, we use the Survey of Income and Program Participation (SIPP) to impute consumer eligibility \citep{SIPP2019}.
+	
+To impute consumer exchange market eligibility, we use data from the SIPP. The SIPP is well-suited for the imputation because (1) it asks the insurance status of respondents for every month over a three-year period (2013-2015) and (2) it includes detailed information on the chief reasons for consumers' coverage status, such as whether the respondent obtained or lost an offer of employer-sponsored insurance, moved in or out of California, or became eligible or ineligible for Medicare or Medicaid. For SIPP respondents who newly obtained or gave up individual market coverage, we construct a \textit{transitioned} variable that indicates whether the respondent gained or lost eligibility for the individual market. The \textit{transitioned} variable takes value 1 if the respondent (1) belongs to a household that obtained or lost an offer of employer-sponsored insurance; (2) moved out of or into California; (3) the respondent turned 65 and qualified for Medicare; and (4) the respondent became eligible for Medicaid following a drop in income. We estimate a logit model regression of the \textit{transitioned} variable on the demographic variables available in both the SIPP and the Covered California data, including age, income, gender, race, and household size. We use the estimated logit to predict whether Covered California consumers observed for only some years of our study timeframe transitioned into or out of the exchange market. Consumers transitioning into or out of the exchange market are removed from our study population during years when they are not enrolled in an exchange plan. 
+
+\newpage
+
+\section{Mathematical Formulas in the ACA Exchange Model}\label{app::model_formulas}
+
+\noindent In this appendix, we write all model variables in terms of the following three variables and associated partial derivatives: (1) the household choice probabilities $q_{ijt}(\textit{p},\textit{n})$ with partial derivatives $\frac{ \partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{ijt}(\textit{p},\textit{n})}$ and $\frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial \eta_{gijt}(\textit{p},\textit{n})}$; (2) the plan risk scores $r_{jmt}(\textit{p},\textit{n})$ with partial derivatives $\frac{\partial r_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}(\textit{p},\textit{n})}$ and $\frac{\partial r_{kmt}(\textit{p},\textit{n})}{\partial \eta_{gijt}(\textit{p},\textit{n})}$; and (3) plan average claims $c_{jmt}(\textit{p},\textit{n})$ with partial derivatives $ \frac{\partial c_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}(\textit{p},\textit{n})}$ and $\frac{\partial c_{kmt}(\textit{p},\textit{n})}{\partial \eta_{gijt}(\textit{p},\textit{n})}$.		
+	
+\noindent \textit{\bf Demand partial derivatives}:
+
+\noindent The demand partial derivatives with respect to the firm's base plan premium $p_{jmt}$ and commission decision $n_{gjt}$ are 	
+	
+\vspace{-0.4in}		
+		
+		\begin{eqnarray*}
+		\frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{jmt}} &=& \begin{cases} \sum_{l \in J_{mt}} \left[ \frac{ \partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{ilt}(\textit{p})}\frac{ \partial p_{ilt}(\textit{p})}{\partial p_{jmt}} +  \delta_{glt} \sigma_{it} \frac{ \partial q_{ikt}(\textit{p},\textit{n})}{\partial \eta_{gilt}(\textit{p})}  \right] & $l= j$, \mathrm{\% \,\, commission} \\
+		\sum_{l \in J_{mt}}  \frac{ \partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{ilt}(\textit{p})}\frac{ \partial p_{ilt}(\textit{p})}{\partial p_{jmt}}  & \mathrm{o/w} 
+		\end{cases}
+		\end{eqnarray*}
+		
+		
+	\vspace{-0.4in}
+	\singlespacing	
+
+		 \begin{eqnarray*}
+	\frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial n_{gjt}} &=& \begin{cases} 
+		\sigma_{it} p_{jmt} \frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial \eta_{gijt}(\textit{p},\textit{n})}  & \mathrm{\% \,\, commission} \\		
+		\frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial \eta_{gijt}(\textit{p},\textit{n})} & \mathrm{\$ \,\, commission}
+   \end{cases}
+	\end{eqnarray*}
+				
+		\doublespacing
+				
+		
+	\noindent	where $\frac{\partial p_{ilt}(\textit{p})}{\partial p_{jmt}}$ is given in equation~(\ref{price_partial_formula}).
+	
+		
+\noindent \textit{\bf Revenue}:
+	
+\noindent Total premium revenue earned by the firm is 		
+	
+		\vspace{-0.3in}		
+	
+		$$
+		R_{ft}(\textit{p},\textit{n}) = \sum_{i \in I, m \in M, k \in J_{fmt}} \sigma_{it} p_{kmt} q_{ikt}(\textit{p},\textit{n})
+		$$	
+	
+\noindent and the partial derivatives with respect to the firm's base plan premium $p_{jmt}$ and commission decision $n_{gjt}$ are 	
+	
+		\vspace{-0.4in}		
+	
+		\begin{eqnarray*}
+		\frac{\partial R_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} &=&  \sum_{i \in I, m \in M, k \in J_{fmt}} \sigma_{it} \left(q_{ijt}(\textit{p},\textit{n}) + p_{kmt} \frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{jmt}} \right) \\
+		\frac{\partial R_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}} &=& \sum_{i \in I, m \in M, k \in J_{fmt}} \sigma_{it} p_{kmt}  \frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial n_{gjt}} 
+		\end{eqnarray*}
+
+	\vspace{-0.1in}
+
+\noindent \textit{\bf Claims}:
+	
+\noindent Total claims paid by the firm are 		
+	
+	\vspace{-0.3in}		
+	
+		$$
+		C_{ft}(\textit{p},\textit{n}) = \sum_{k \in J_{fmt}} c_{kmt}(\textit{p},\textit{n}) q_{kmt}(\textit{p},\textit{n})
+		$$	
+	
+\noindent where total plan demand $q_{kmt}(\textit{p},\textit{n}) = \sum_{i\in I} \left(\mathbb{I}_{i,m,t} \right) q_{ikt}(\textit{p},\textit{n})$  and the partial derivatives with respect to the firm's base plan premium $p_{jmt}$ and commission decision $n_{gjt}$ are 		
+	
+		\vspace{-0.4in}
+		\begin{eqnarray*}
+		\frac{\partial C_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} &=& \sum_{k \in J_{fmt}} \left[ c_{kmt}(\textit{p},\textit{n})\frac{ \partial q_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}}   +  q_{kmt}(\textit{p},\textit{n})\frac{ \partial c_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} \right] \\
+		\frac{\partial C_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}} &=& \sum_{k \in J_{fmt}} \left[ c_{kmt}(\textit{p},\textit{n})\frac{ \partial q_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}}   +  q_{kmt}(\textit{p},\textit{n})\frac{ \partial c_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} \right]
+		\end{eqnarray*}
+
+	\vspace{-0.1in}
+	
+\noindent \textit{\bf Commissions}:
+	
+\noindent Total commissions paid by the firm are	
+	
+	\vspace{-0.3in}		
+	
+		$$
+		\mathcal{C}_{ft}(\textit{p},\textit{n};\boldsymbol{\theta}) = \sum_{g \in G, i \in I, m \in M, k \in J_{fmt}} \left( \mathbb{I}_{n,i,t} \right)   \eta_{gikt}(\textit{p},\textit{n}) q_{ikt}(\textit{p},\textit{n};\boldsymbol{\beta})
+		$$	
+	
+			
+	
+\noindent and the partial derivatives with respect to the firm's base plan premium $p_{jmt}$ and commission decision $n_{gjt}$ are 			
+	
+	
+	
+	
+\vspace{-0.4in}		
+		
+		\begin{eqnarray*}
+		\frac{\partial \mathcal{C}_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} &=& \begin{cases} \sum_{g \in G, i \in I,m \in M, k \in J_{fmt}} \mathbb{I}_{n,i,t} \left[ \eta_{gikt}(\textit{p},\textit{n}) \frac{ \partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{jmt}} +  \left(\delta_{gjt} \sigma_{it} \right)  q_{ikt}(\textit{p},\textit{n})  \right] &  \mathrm{\% \,\, commission} \\
+		  \sum_{g \in G, i \in I, m \in M, k \in J_{fmt}} \left( \mathbb{I}_{n,i,t}\right) \eta_{gikt}(\textit{p},\textit{n}) \frac{ \partial q_{ikt}(\textit{p},\textit{n})}{\partial p_{jmt}}  & \mathrm{\$ \,\, commission}
+		\end{cases}
+		\end{eqnarray*}
+		
+		
+	
+	
+\vspace{-0.4in}
+	\singlespacing	
+
+		 \begin{eqnarray*}
+	\frac{\partial \mathcal{C}_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}} &=& \begin{cases} 
+		\sum_{g \in G, i \in I, m \in M, k \in J_{fmt}} \mathbb{I}_{n,i,t} \left[\eta_{gikt}(\textit{p},\textit{n}) \frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial n_{gjt}} +  \left(\sigma_{it} p_{jmt} \right) q_{ikt}(\textit{p},\textit{n})   \right]   & \mathrm{\% \,\, commission} \\		
+		\sum_{g \in G, i \in I, m \in M, k \in J_{fmt}} \mathbb{I}_{n,i,t} \left[\eta_{gikt}(\textit{p},\textit{n}) \frac{\partial q_{ikt}(\textit{p},\textit{n})}{\partial n_{gjt}} + q_{ikt}(\textit{p},\textit{n})  \right]  & \mathrm{\$ \,\, commission}
+   \end{cases}
+	\end{eqnarray*}
+				
+		\doublespacing
+						
+	
+	
+\noindent \textit{\bf Risk adjustment}:
+	
+\noindent As defined in equation~(\ref{ra_formula}), the firm's risk adjustment transfer is	
+	
+	\vspace{-0.3in}		
+		
+	$$
+	RA_{ft}(\textit{p},\textit{n}) =  R_t(\textit{p},\textit{n}) \sum_{m \in M, k \in J_{fmt}} \left[ rs_{kmt}(\textit{p},\textit{n}) - us_{kmt}(\textit{p},\textit{n})  \right]
+	$$		
+			
+\noindent and the partial derivatives with respect to the firm's base plan premium $p_{jmt}$ and commission decision $n_{gjt}$ are 			
+		
+		\vspace{-0.4in}		
+	
+		\begin{eqnarray*}
+		\frac{\partial RA_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} &=& \sum_{k \in J_{fmt}}  \left[\frac{\partial R_t(\textit{p},\textit{n})}{\partial p_{jmt}}\left( rs_{kmt}(\textit{p},\textit{n}) - us_{kmt}(\textit{p},\textit{n})  \right) \right. \nonumber \\ && \left. + \,\,\,  R_t(\textit{p},\textit{n}) \left( \frac{\partial rs_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} - \frac{\partial  us_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} \right) \right] \\
+		\frac{\partial RA_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}} &=& \sum_{k \in J_{fmt}}  \left[\frac{\partial R_t(\textit{p},\textit{n})}{\partial n_{gjt}}\left( rs_{kmt}(\textit{p},\textit{n}) - us_{kmt}(\textit{p},\textit{n})  \right) \right. \nonumber \\ && \left. + \,\,\,  R_t(\textit{p},\textit{n}) \left( \frac{\partial rs_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} - \frac{\partial  us_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} \right) \right]
+		\end{eqnarray*}
+
+		\vspace{-0.1in}			
+			
+\noindent where			
+	
+\vspace{-0.4in}	
+
+	
+
+
+	\begin{eqnarray*}
+	\frac{\partial R_t(\textit{p},\textit{n})}{\partial p_{jmt}} &=& \sum_{f \in F} \frac{\partial R_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} \\
+	\frac{\partial R_t(\textit{p},\textit{n})}{\partial n_{gjt}} &=& \sum_{f \in F} \frac{\partial R_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}}
+	\end{eqnarray*}
+
+
+	
+\vspace{-0.4in}	
+
+	\begin{eqnarray*}
+	\frac{ \partial us_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} 
+	&=& \left(\sum_{m\in M,l \in J_{mt}} h_l q_{lmt}(\textit{p},\textit{n}) \right)^{-1}  \\ && \times \,\,\, \left[h_k \frac{\partial q_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} - \frac{h_k q_{kmt}(\textit{p},\textit{n})}{\sum_{m\in M,l \in J_{mt}} h_l q_{lmt}(\textit{p},\textit{n})}  \sum_{l \in J_{mt}} h_l \frac{\partial q_{lmt}(\textit{p},\textit{n})}{\partial p_{jmt} } \right] \\
+	\frac{ \partial us_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} 
+	&=& \left(\sum_{m\in M,l \in J_{mt}} h_l q_{lmt}(\textit{p},\textit{n}) \right)^{-1}  \\ && \times \,\,\, \left[h_k \frac{\partial q_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} - \frac{h_k q_{kmt}(\textit{p},\textit{n})}{\sum_{m\in M,l \in J_{mt}} h_l q_{lmt}(\textit{p},\textit{n})}  \sum_{l \in J_{mt}} h_l \frac{\partial q_{lmt}(\textit{p},\textit{n})}{\partial n_{gjt} } \right]
+	\end{eqnarray*}	
+
+
+\vspace{-0.4in}	
+
+	\begin{eqnarray*}
+	\frac{ \partial rs_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} 
+	&=& \left(\sum_{m\in M,l \in J_{mt}} r_{lmt}(\textit{p},\textit{n}) q_{lmt}(\textit{p},\textit{n})\right)^{-1}\left[\left(r_{kmt}(\textit{p},\textit{n})\frac{\partial q_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} + q_{kmt}(\textit{p},\textit{n})\frac{\partial r_{kmt}(\textit{p},\textit{n})}{\partial p_{jmt}} \right) \right.\\
+	&& - \,\,\, \left. \frac{r_{jmt}(\textit{p},\textit{n}) q_{jmt}(\textit{p},\textit{n})}{\sum_{m\in M,l \in J_{mt}} r_{lmt}(\textit{p},\textit{n}) q_{lmt}(\textit{p},\textit{n})}\sum_{l \in J_{mt}} \left[r_{lmt}(\textit{p},\textit{n})\frac{\partial q_{lmt}(\textit{p},\textit{n})}{\partial p_{jmt}} + q_{lmt}(\textit{p},\textit{n})\frac{\partial r_{lmt}(\textit{p},\textit{n})}{\partial p_{jmt}} \right]\right] \\
+	\frac{ \partial rs_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} 
+	&=& \left(\sum_{m\in M,l \in J_{mt}} r_{lmt}(\textit{p},\textit{n}) q_{lmt}(\textit{p},\textit{n})\right)^{-1}\left[\left(r_{kmt}(\textit{p},\textit{n})\frac{\partial q_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} + q_{kmt}(\textit{p},\textit{n})\frac{\partial r_{kmt}(\textit{p},\textit{n})}{\partial n_{gjt}} \right) \right.\\
+	&& - \,\,\, \left. \frac{r_{jmt}(\textit{p},\textit{n}) q_{jmt}(\textit{p},\textit{n})}{\sum_{m\in M,l \in J_{mt}} r_{lmt}(\textit{p},\textit{n}) q_{lmt}(\textit{p},\textit{n})}\sum_{l \in J_{mt}} \left[r_{lmt}(\textit{p},\textit{n})\frac{\partial q_{lmt}(\textit{p},\textit{n})}{\partial n_{gjt}} + q_{lmt}(\textit{p},\textit{n})\frac{\partial r_{lmt}(\textit{p},\textit{n})}{\partial n_{gjt}} \right]\right]
+	\end{eqnarray*}		
+	
+	
+	
+
+	
+	
+\noindent \textit{\bf Variable administrative cost}:
+	
+\noindent Total variable administrative cost is	
+	
+	\vspace{-0.3in}		
+	
+		$$
+		V_{ft}(\textit{p},\textit{n}) = v_{ft} q_{ft}(\textit{p},\textit{n})
+		$$	
+	
+		 
+\noindent where $v_{ft}$ is the variable administrative cost per-member per-month and total firm demand $q_{ft}(\textit{p},\textit{n}) = \sum_{i \in I, j \in J_f} q_{ijt}(\textit{p},\textit{n})$.  The partial derivatives with respect to the firm's base plan premium $p_{jmt}$ and commission decision $n_{gjt}$ are 				 
+		 
+		\vspace{-0.4in}	
+
+	\begin{eqnarray*}
+	\frac{ \partial V_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} &=& v_{ft} \frac{\partial q_{ft}(\textit{p},\textit{n})}{\partial p_{jmt}} \\
+	\frac{ \partial V_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}} &=& v_{ft} \frac{\partial q_{ft}(\textit{p},\textit{n})}{\partial n_{gjt}}
+	\end{eqnarray*}
+
 
 \end{document}
