@@ -8,6 +8,7 @@
 \usepackage{marginnote}
 \usepackage[justification=centering]{caption}
 %%\usepackage{breqn}
+\usepackage{booktabs}
 \newcommand{\pderiv}[2]{\frac{\partial#1}{\partial#2}}
 %\usepackage{siunitx}
 \newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
@@ -93,15 +94,6 @@ We have detailed individual and household-level administrative data from Califor
 
 Our final data consist of 8.3 million total annual enrollments from 2014-2019. Of these, 4.5 million are newly enrolled (e.g., not enrolled in any California exchange plan in the prior year). Table~\ref{tab:summary-stats} displays summary statistics for Covered California households, separately between those that used and did not use decision assistance. The silver tier is the most commonly selected option because consumers eligible for cost sharing reductions (CSRs) must choose a silver plan to receive CSRs.  Approximately 68 percent of California enrollees and 61 percent of Washington enrollees are eligible for CSRs, while 91 percent of California enrollees and 85 percent of Washington enrollees are eligible for premium subsidies.  The proportion of consumers exempt from the individual mandate is small, but is notably higher among those who are uninsured.  The uninsured rate is substantially higher among young adults and males in both states. Individuals with incomes between 250 and 400 percent of FPL, who receive relatively small subsidies, and those with incomes above 400 percent of FPL, who are ineligible for subsidies, make up a relatively large share of the uninsured population.
 
-\begin{table}[h]
-\centering	
-\caption{Summary Statistics for Covered California Enrollees}
-\input{tables/summary-stats.tex}
-\footnote{Something}
-\label{tab:summary-stats}
-\end{table}
-
-
 \section{Decision Assistance and Plan Choice}
 \label{sec:causal}
 
@@ -161,6 +153,19 @@ We are also extending our analysis of the differential effects between public de
 
 
 \section*{Tables and Figures}
+
+\begin{table}[h!]
+\centering
+\footnotesize
+\begin{minipage}[h]{6in}
+\caption[caption]{\textbf{Summary Statistics for Covered California Enrollees}\footnote{Statistics based on the population of Covered California enrollees from 2014-2019.}}
+\centerline{%
+    \input{tables/summary_stats.tex}
+}
+\label{tab:summary-stats}
+\end{minipage}
+\end{table}
+
 
 \begin{figure}[htb]\caption{Count of Enrollees in California Exchange}
 \centering
