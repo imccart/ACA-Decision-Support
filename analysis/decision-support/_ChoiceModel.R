@@ -11,7 +11,7 @@ area.dat <- as.list(unique.region)$region
 
 
 
-# Estimate with purrr -----------------------------------------------------
+# Estimation --------------------------------------------------------------
 
 hh.nest <- hh.clean %>%
   left_join(afford.threshold, by="year") %>%
@@ -40,10 +40,9 @@ choice.regs <- full.nest %>%
   mutate(nest_names = map(data.est, ~unique(.x$plan_name)),
          nest1=map(nest_names, ~.x[.x !="Uninsured"])) %>%
   mutate( regs = map2(data.est, nest1, ~dchoice.reg(d=.x, nest.names=.y)),
-          tidied = map(regs, tidy),
-          pred = data.est)
+          tidied = map(regs, tidy))
 
-for (i in nrow(choice.regs)) {
+for (i in 1:nrow(choice.regs)) {
   oos.nest <- mlogit.data(choice.regs$data_full[[i]], choice="choice", shape="long", chid.var = "household_number", alt.var="plan_name")
   nest.coef <- choice.regs$regs[[i]]
   nest.names <- choice.regs$nest1[[i]]
@@ -55,13 +54,22 @@ for (i in nrow(choice.regs)) {
     group_by(plan_name) %>% 
     summarize(tot_nonmiss=sum(!is.na(pred_purchase)),
               obs_purchase=sum(choice, na.rm=TRUE),
-              pred_purchase=sum(pred_purchase, na.rm=TRUE))
+              pred_purchase=sum(pred_purchase, na.rm=TRUE)) %>%
+    mutate(region=choice.regs$region[[i]],
+           year = choice.regs$year[[i]])
   
-  choice.regs$pred[[i]] <- treated.dat
+  if (i==1) {
+    all.prob <- treated.dat
+  } else {
+    all.prob <- bind_rows(all.prob, treated.dat)
+  }
+  
 }
 
 
-## start back here trying the bootstrap with purrr
+
+# Bootstrap standard errors -----------------------------------------------
+
 bs.choice.data <- full.nest %>% 
   mutate(hh.final = map(data_full, ~.x %>% distinct(.x$household_number)))
 
@@ -129,141 +137,6 @@ for (b in 1:max.boot) {
     sim.bs.pred <- bind_rows(sim.bs.pred, bs.pred)  
   }
   
+  print(paste0("finished bootstrap: ", b, "at time ", Sys.time()))
 } 
     
-
-
-
-
-          
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-# # Estimate model ----------------------------------------------------------
-# source('analysis/decision-support/choice_data_function.R')
-# source('analysis/decision-support/choice_est_function.R')
-# source('analysis/decision-support/choice_est_bs_function.R')
-# 
-# 
-# for (t in time.dat) {
-#   
-#   step=0
-#   for (r in area.dat) {
-#     step=step+1
-#     
-#     choice.data <- choice.data.fnc(t=t,r=r)
-#     assign(paste0("est.data.",r,".",t), choice.data$est.data)
-#     assign(paste0("oos.data.",r,".",t), choice.data$oos.data)
-#     nest.names <- unique(choice.data$est.data$plan_name)
-#     nest.in <- nest.names[nest.names != "Uninsured"]
-#     nest.out <- nest.names[nest.names == "Uninsured"]
-#     assign(paste0("nest.in.",r,".",t), nest.in)
-#     assign(paste0("nest.out.",r,".",t), nest.out)
-#     
-#     choice.est <- dchoice.est(d=choice.data$est.data, oos=choice.data$oos.data, t=t, r=r)
-#     
-#     treated.dat <- choice.est$pred
-#     coef.vals <- choice.est$coef
-#     if (step==1) {
-#       final.data <- treated.dat
-#       final.coef <- coef.vals
-#     } else {
-#       final.data <- bind_rows(final.data, treated.dat)
-#       final.coef <- bind_rows(final.coef, coef.vals)
-#     }
-#   }
-#   
-#   assign(paste0("final.data.",t),final.data)
-#   assign(paste0("final.coef.",t),final.coef)
-#   textme(msg=paste0(emo::ji("space"),"One small step for man...You've completed time: ",t))
-#   
-# }
-# 
-# 
-# step=0
-# for (t in time.dat) {
-#   step=step+1
-#   if (step==1) {
-#     est.prob <- get(paste0("final.data.",t))
-#     bs.starting <- get(paste0("final.coef.",t))
-#   } else {
-#     est.prob <- bind_rows(est.prob, get(paste0("final.data.",t)))
-#     bs.starting <- bind_rows(bs.starting, get(paste0("final.coef.",t)))
-#   }
-# }
-# 
-# all.coef <- bs.starting
-# all.prob <- est.prob
-# 
-# 
-# # Bootstrap Standard Errors -----------------------------------------------
-# max.boot <- 200
-# 
-# for (b in 1:max.boot) {
-# 
-#   for (t in time.dat) {
-#     
-#     step=0
-#     for (r in area.dat) {
-#       step=step+1
-#       
-#       nest.in <- get(paste0("nest.in.",r,".",t))
-#       nest.out <- get(paste0("nest.out.",r,".",t))
-#       
-#       bs.choice <- dchoice.bs(t=t, r=r)
-#       treated.dat <- bs.choice$pred
-#       coef.vals <- bs.choice$coef
-# 
-#       if (step==1) {
-#         boot.data <- treated.dat
-#         boot.coef <- coef.vals
-#       } else {
-#         boot.data <- bind_rows(boot.data, treated.dat)
-#         boot.coef <- bind_rows(boot.coef, coef.vals)
-#       }
-#     }
-#     
-#     assign(paste0("boot.data.",t),boot.data)
-#     assign(paste0("boot.coef.",t),boot.coef)
-#     
-#   }
-#   
-#   step=0
-#   for (t in time.dat) {
-#     step=step+1
-#     if (step==1) {
-#       boot.data.time <- get(paste0("boot.data.",t))
-#       boot.coef.time <- get(paste0("boot.coef.",t))
-#     } else {
-#       boot.data.time <- bind_rows(boot.data.time, get(paste0("boot.data.",t)))
-#       boot.coef.time <- bind_rows(boot.coef.time, get(paste0("boot.coef.",t)))
-#     }
-#   }
-#   
-#   if (b==1) {
-#     bs.coef <- boot.coef.time %>%
-#       mutate(boot=1)
-#     bs.pred <- boot.data.time %>%
-#       mutate(boot=1)
-#   }
-#   if (b>1) {
-#     bs.coef <- bind_rows(bs.coef, boot.coef.time %>% mutate(boot=b))
-#     bs.pred <- bind_rows(bs.pred, boot.data.time %>% mutate(boot=b))  
-#   }
-#   
-#   textme(msg=paste0(emo::ji("boot"),"You get the boot! You've completed iteration: ",b))
-# }
-# 
-# textme(msg=paste0(emo::ji("mage"),"  As it is written, so it has been done.  ",emo::ji("sparkles")))

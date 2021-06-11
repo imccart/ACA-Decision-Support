@@ -99,7 +99,7 @@ choice.data.fnc2 <- function(plans, hhs) {
   clean.choice.large <- clean.choice.data %>%
     filter(Issuer_Name %in% c('Anthem', 'Blue_Shield', 'Kaiser', 'Health_Net', 'Outside_Option')) %>%
     mutate(monthly_penalty=penalty/12) %>%
-    select(household_id, FPL, hh_plan_name, oldest_member, hh_insurer,
+    select(household_id, FPL, hh_plan_name, oldest_member, hh_insurer, hh_plan_number,
            cheapest_premium, Issuer_Name, PLAN_NETWORK_TYPE, MSP, HMO, HSA,
            metal_level, metal, plan_name,
            final_subsidy, final_premium, plan_choice, insured, monthly_penalty,
@@ -110,7 +110,7 @@ choice.data.fnc2 <- function(plans, hhs) {
     group_by(household_id, metal) %>%
     summarize(final_premium=min(final_premium, na.rm=TRUE),
               plan_choice=max(plan_choice,na.rm=TRUE),
-              FPL=first(FPL), hh_plan_name=first(hh_plan_name),
+              FPL=first(FPL), hh_plan_name=first(hh_plan_name), hh_plan_number=first(hh_plan_number),
               oldest_member=first(oldest_member),
               cheapest_premium=first(cheapest_premium), insured=first(insured),
               penalty=first(penalty),
@@ -119,7 +119,7 @@ choice.data.fnc2 <- function(plans, hhs) {
               silver=mean(silver, na.rm=TRUE), bronze=mean(bronze, na.rm=TRUE),
               AV=mean(AV, na.rm=TRUE))%>%
     mutate(monthly_penalty=penalty/12) %>%      
-    select(household_id, FPL, hh_plan_name, oldest_member,
+    select(household_id, FPL, hh_plan_name, oldest_member, hh_plan_number,
            cheapest_premium, plan_choice, insured, final_premium, monthly_penalty,
            platinum, gold, silver, bronze, AV, metal) %>%
     mutate(Issuer_Name='Small_Insurer', hh_insurer="Small_Insurer",
@@ -134,7 +134,7 @@ choice.data.fnc2 <- function(plans, hhs) {
   
   ## Final dataset (for zip and year)
   choices <- bind_rows(clean.choice.large,clean.choice.small) %>%
-    select(household_id, FPL, hh_plan_name, hh_insurer, oldest_member,
+    select(household_id, FPL, hh_plan_name, hh_insurer, hh_plan_number, oldest_member,
            cheapest_premium, Issuer_Name, PLAN_NETWORK_TYPE, MSP, metal, HMO, HSA,
            metal_level, final_subsidy, final_premium, plan_choice, insured, monthly_penalty,
            platinum, silver, gold, bronze, AV, plan_name) %>%
@@ -146,7 +146,7 @@ choice.data.fnc2 <- function(plans, hhs) {
            plan_choice = case_when(
              plan_choice==1 & insured==1 ~ 1,
              plan_choice==0 & insured==1 ~ 0,
-             plan_choice==0 & insured==0 & plan_name=="Uninsured" ~ 1,
+             plan_choice==0 & insured==0 & plan_name=="Uninsured" & is.na(hh_plan_number) ~ 1,
              plan_choice==0 & insured==0 & plan_name!="Uninsured" ~ 0))
   
   
@@ -227,7 +227,13 @@ choice.data.fnc2 <- function(plans, hhs) {
            hh_size_prem, any_0to17_prem, FPL_250to400_prem, FPL_400plus_prem, any_black_prem, any_hispanic_prem,
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
            Anthem, Blue_Shield, Kaiser, Health_Net, ipweight) %>%
-    mutate(assisted=0)
+    mutate(assisted=0) %>%
+    group_by(household_number) %>%
+    mutate(any_choice=max(choice)) %>%
+    filter(any_choice==1) %>%
+    ungroup() %>%
+    select(-any_choice)
+    
   
   oos.data <- treated.dat %>%
     inner_join(sample.hh.oos, by=c("household_number")) %>%              
@@ -235,7 +241,13 @@ choice.data.fnc2 <- function(plans, hhs) {
            platinum, gold, silver, bronze, HSA, HMO, AV, uninsured_plan, 
            hh_size_prem, any_0to17_prem, FPL_250to400_prem, FPL_400plus_prem, any_black_prem, any_hispanic_prem,
            hh_size, any_0to17, FPL_250to400, FPL_400plus, any_black, any_hispanic,
-           Anthem, Blue_Shield, Kaiser, Health_Net, ipweight)
+           Anthem, Blue_Shield, Kaiser, Health_Net, ipweight) %>%
+    group_by(household_number) %>%
+    mutate(any_choice=max(choice)) %>%
+    filter(any_choice==1) %>%
+    ungroup() %>%
+    select(-any_choice)
+  
   
   oos.data <- oos.data %>%
     inner_join(est.data %>% distinct(plan_name),

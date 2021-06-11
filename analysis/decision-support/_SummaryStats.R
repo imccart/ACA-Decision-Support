@@ -254,48 +254,49 @@ sum.stats.data <- hh.full %>% ungroup() %>%
          FPL_250=if_else(FPL_bracket=="138to250",1,0),
          FPL_400=if_else(FPL_bracket=="250to400",1,0),
          FPL_high=if_else(FPL_bracket=="400ormore",1,0),
-         Kaiser=if_else(insurer=="Kaiser",1,0),
-         Anthem=if_else(insurer=="Anthem",1,0),
-         BlueShield=if_else(insurer=="Blue_Shield",1,0),
-         HealthNet=if_else(insurer=="Health_Net",1,0),
-         Other=if_else(insurer %in% c("Kaiser","Anthem","Blue_Shield","Health_Net"),0,1),
-         Bronze=if_else(metal=="Bronze",1,0),
-         Silver=if_else(metal=="Silver",1,0),
-         Gold=if_else(metal=="Gold",1,0),         
-         Platinum=if_else(metal=="Platinum",1,0),
-         Catastrophic=if_else(metal=="Catastrophic",1,0),
-         HMO=if_else(plan_network_type=="HMO",1,0),
-         PPO=if_else(plan_network_type=="PPO",1,0),
-         EPO=if_else(plan_network_type=="EPO",1,0),
-         HSP=if_else(plan_network_type=="HSP",1,0)) %>%
-  select(starts_with("FPL_"),Kaiser, Anthem, BlueShield, HealthNet, Other, Bronze, Silver, Gold, Platinum, Catastrophic, HMO, PPO, EPO, HSP,
-         assisted, navigator, any_agent, household_size, num_children_subject, perc_black, perc_hispanic, perc_white)
+         Kaiser=if_else(insurer=="Kaiser" & !is.na(plan_number_nocsr),1,0),
+         Anthem=if_else(insurer=="Anthem" & !is.na(plan_number_nocsr),1,0),
+         BlueShield=if_else(insurer=="Blue_Shield" & !is.na(plan_number_nocsr),1,0),
+         HealthNet=if_else(insurer=="Health_Net" & !is.na(plan_number_nocsr),1,0),
+         Uninsured=if_else(is.na(plan_number_nocsr),1,0),
+         Other=if_else( (!insurer %in% c("Kaiser","Anthem","Blue_Shield","Health_Net")) & !is.na(plan_number_nocsr),1,0),
+         Bronze=if_else(metal=="Bronze" & !is.na(plan_number_nocsr),1,0),
+         Silver=if_else(metal=="Silver" & !is.na(plan_number_nocsr),1,0),
+         Gold=if_else(metal=="Gold" & !is.na(plan_number_nocsr),1,0),         
+         Platinum=if_else(metal=="Platinum" & !is.na(plan_number_nocsr),1,0),
+         Catastrophic=if_else(metal=="Catastrophic" & !is.na(plan_number_nocsr),1,0),
+         HMO=if_else(plan_network_type=="HMO" & !is.na(plan_number_nocsr),1,0),
+         PPO=if_else(plan_network_type=="PPO" & !is.na(plan_number_nocsr),1,0),
+         EPO=if_else(plan_network_type=="EPO" & !is.na(plan_number_nocsr),1,0),
+         HSP=if_else(plan_network_type=="HSP" & !is.na(plan_number_nocsr),1,0)) %>%
+  select(starts_with("FPL_"),Kaiser, Anthem, BlueShield, HealthNet, Uninsured, Other, Bronze, Silver, Gold, Platinum, Catastrophic, 
+         HMO, PPO, EPO, HSP, assisted, navigator, any_agent, household_size, num_children_subject, perc_black, perc_hispanic, perc_white)
   
 
 sum.stats.assist <- sum.stats.data %>% filter(assisted==1) %>%
-  summarize(across(c("FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
-                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP",
-                     "household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white", "navigator", "any_agent"),
-               list(Mean=mean, N=~n(),
+  summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
+                     "FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
+                     "Uninsured","Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
+                   list(Mean=mean, N=~n(),
                     q1=~quantile(., probs=0.10, na.rm=TRUE),
                     q9=~quantile(., probs=0.90, na.rm=TRUE)),
             na.rm=TRUE,
             .names="{col}_{fn}"))
 
 sum.stats.unassist <- sum.stats.data %>% filter(assisted==0) %>%
-  summarize(across(c("FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
-                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP",
-                     "household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white"),
+  summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
+                     "FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
+                     "Uninsured","Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
                    list(Mean=mean, N=~n(),
                         q1=~quantile(., probs=0.10, na.rm=TRUE),
                         q9=~quantile(., probs=0.90, na.rm=TRUE)),
                    na.rm=TRUE,
                    .names="{col}_{fn}"))
 
-sum.stats.all <- sum.stats.data %>% filter(assisted==0) %>%
-  summarize(across(c("FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
-                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP",
-                     "household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white"),
+sum.stats.all <- sum.stats.data %>%
+  summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
+                     "FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
+                     "Uninsured","Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
                    list(Mean=mean, N=~n(),
                         q1=~quantile(., probs=0.10, na.rm=TRUE),
                         q9=~quantile(., probs=0.90, na.rm=TRUE)),
@@ -348,10 +349,10 @@ kable(final.sum.stats, format="latex",
       col.names = c("Variable","Assisted","Unassisted","Overall"),
       digits=c(0,2,2,2),
       booktabs=T) %>%
-  pack_rows("Income relative to FPL", 1, 4) %>%
-  pack_rows("Insurer",5, 9) %>%
-  pack_rows("Metal Tier",10, 14) %>%
-  pack_rows("Network Type", 15, 18) %>%
-  pack_rows("Household Characteristics", 19, 26) %>%
+  pack_rows("Household Demographics", 1, 5) %>%  
+  pack_rows("Income relative to FPL", 6, 9) %>%
+  pack_rows("Insurer",10, 15) %>%
+  pack_rows("Metal Tier",16, 20) %>%
+  pack_rows("Network Type", 21, 24) %>%
   save_kable("tables/summary_stats.tex")
 
