@@ -276,7 +276,7 @@ sum.stats.data <- hh.full %>% ungroup() %>%
 sum.stats.assist <- sum.stats.data %>% filter(assisted==1) %>%
   summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
                      "FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
-                     "Uninsured","Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
+                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
                    list(Mean=mean, N=~n(),
                     q1=~quantile(., probs=0.10, na.rm=TRUE),
                     q9=~quantile(., probs=0.90, na.rm=TRUE)),
@@ -285,7 +285,7 @@ sum.stats.assist <- sum.stats.data %>% filter(assisted==1) %>%
 
 sum.stats.unassist1 <- sum.stats.data %>% filter(assisted==0) %>%
   summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
-                     "FPL_low","FPL_250","FPL_400","FPL_high","Uninsured"),
+                     "FPL_low","FPL_250","FPL_400","FPL_high"),
                    list(Mean=mean, N=~n(),
                         q1=~quantile(., probs=0.10, na.rm=TRUE),
                         q9=~quantile(., probs=0.90, na.rm=TRUE)),
@@ -325,23 +325,24 @@ mean.stats.assist <- sum.stats.assist %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
                values_to="Assisted") %>%
   mutate(name=str_remove(name,"_Mean")) %>%
-  bind_rows(as_tibble(assist.count) %>% mutate(name="Obs") %>% rename(Assisted=value))  
+  bind_rows(as_tibble(assist.count) %>% mutate(name="Obs") %>% rename(Assisted=value))
 mean.stats.unassist1 <- sum.stats.unassist1 %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
                values_to="Unassisted") %>%
-  mutate(name=str_remove(name,"_Mean")) %>%
-  bind_rows(as_tibble(unassist.count) %>% mutate(name="Obs") %>% rename(Unassisted=value)) %>%
-  bind_rows(as_tibble(tot.unins) %>% mutate(name="Uninsured") %>% rename(Unassisted=value))  
+  mutate(name=str_remove(name,"_Mean"))
 mean.stats.unassist2 <- sum.stats.unassist2 %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
                values_to="Unassisted") %>%
   mutate(name=str_remove(name,"_Mean"))
-mean.stats.unassist <- mean.stats.unassist1 %>% bind_rows(mean.stats.unassist2)
+mean.stats.unassist <- mean.stats.unassist1 %>% bind_rows(mean.stats.unassist2) %>%
+  bind_rows(as_tibble(unassist.count) %>% mutate(name="Obs") %>% rename(Unassisted=value))
 
 
 final.sum.stats <- mean.stats.assist %>%
   left_join(mean.stats.unassist, by="name") %>%
   left_join(mean.stats.all, by="name") %>%
+  bind_rows(as_tibble(tot.unins) %>% mutate(name="Uninsured") %>% rename(Overall=value) %>%
+              mutate(Assisted=0) %>% mutate(Unassisted=tot.unins)) %>%
   mutate(name=case_when(
     name=="FPL_low" ~ "below 138%",
     name=="FPL_250" ~ "between 138 and 250%",
@@ -368,8 +369,8 @@ kable(final.sum.stats, format="latex",
       booktabs=T) %>%
   pack_rows("Household Demographics", 1, 5) %>%  
   pack_rows("Income relative to FPL", 6, 9) %>%
-  pack_rows("Insurer",10, 15) %>%
-  pack_rows("Metal Tier",16, 20) %>%
-  pack_rows("Network Type", 21, 24) %>%
+  pack_rows("Insurer",10, 14) %>%
+  pack_rows("Metal Tier",15, 19) %>%
+  pack_rows("Network Type", 20, 23) %>%
   save_kable("tables/summary_stats.tex")
 
