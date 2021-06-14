@@ -194,12 +194,12 @@ choice.metals <- metal.final.cond %>%
 choice.insurer <- ins.final.cond %>%
   mutate(insurer = case_when(
     insurer=="ANT" ~ "Anthem",
-    insurer=="BS" ~ "BCBS",
-    insurer=="HN" ~ "HealthNet",
+    insurer=="BS" ~ "Blue Shield",
+    insurer=="HN" ~ "Health Net",
     insurer=="KA" ~ "Kaiser",
     insurer=="Small" ~ "Other"
   )) %>%
-  mutate(insurer = factor(insurer, levels=c("Anthem","BCBS","HealthNet","Kaiser","Other"))) %>%
+  mutate(insurer = factor(insurer, levels=c("Anthem","Blue Shield","Health Net","Kaiser","Other"))) %>%
   ggplot(aes(x=as.factor(insurer),y=att)) +
   geom_hline(aes(yintercept=0),linetype="dashed") +
   geom_errorbar(aes(ymin=p05, ymax=p95),
