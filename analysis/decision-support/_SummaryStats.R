@@ -283,15 +283,24 @@ sum.stats.assist <- sum.stats.data %>% filter(assisted==1) %>%
             na.rm=TRUE,
             .names="{col}_{fn}"))
 
-sum.stats.unassist <- sum.stats.data %>% filter(assisted==0) %>%
+sum.stats.unassist1 <- sum.stats.data %>% filter(assisted==0) %>%
   summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
-                     "FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
-                     "Uninsured","Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
+                     "FPL_low","FPL_250","FPL_400","FPL_high","Uninsured"),
                    list(Mean=mean, N=~n(),
                         q1=~quantile(., probs=0.10, na.rm=TRUE),
                         q9=~quantile(., probs=0.90, na.rm=TRUE)),
                    na.rm=TRUE,
                    .names="{col}_{fn}"))
+sum.stats.unassist2 <- sum.stats.data %>% filter(assisted==0, Uninsured==0) %>%
+  summarize(across(c("Kaiser","Anthem","BlueShield","HealthNet",
+                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
+                   list(Mean=mean, N=~n(),
+                        q1=~quantile(., probs=0.10, na.rm=TRUE),
+                        q9=~quantile(., probs=0.90, na.rm=TRUE)),
+                   na.rm=TRUE,
+                   .names="{col}_{fn}"))
+
+
 
 sum.stats.all <- sum.stats.data %>%
   summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
@@ -306,6 +315,7 @@ sum.stats.all <- sum.stats.data %>%
 tot.count <- nrow(sum.stats.data)/1000000
 assist.count <- nrow(sum.stats.data %>% filter(assisted==1))/1000000
 unassist.count <- nrow(sum.stats.data %>% filter(assisted==0))/1000000
+tot.unins <- nrow(sum.stats.data %>% filter(Uninsured==1))/1000000
 mean.stats.all <- sum.stats.all %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
                values_to="Overall") %>%
@@ -316,11 +326,17 @@ mean.stats.assist <- sum.stats.assist %>% select(ends_with("_Mean")) %>%
                values_to="Assisted") %>%
   mutate(name=str_remove(name,"_Mean")) %>%
   bind_rows(as_tibble(assist.count) %>% mutate(name="Obs") %>% rename(Assisted=value))  
-mean.stats.unassist <- sum.stats.unassist %>% select(ends_with("_Mean")) %>%
+mean.stats.unassist1 <- sum.stats.unassist1 %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
                values_to="Unassisted") %>%
   mutate(name=str_remove(name,"_Mean")) %>%
-  bind_rows(as_tibble(unassist.count) %>% mutate(name="Obs") %>% rename(Unassisted=value))  
+  bind_rows(as_tibble(unassist.count) %>% mutate(name="Obs") %>% rename(Unassisted=value)) %>%
+  bind_rows(as_tibble(tot.unins) %>% mutate(name="Uninsured") %>% rename(Unassisted=value))  
+mean.stats.unassist2 <- sum.stats.unassist2 %>% select(ends_with("_Mean")) %>%
+  pivot_longer(cols=ends_with("_Mean"),
+               values_to="Unassisted") %>%
+  mutate(name=str_remove(name,"_Mean"))
+mean.stats.unassist <- mean.stats.unassist1 %>% bind_rows(mean.stats.unassist2)
 
 
 final.sum.stats <- mean.stats.assist %>%
@@ -341,6 +357,7 @@ final.sum.stats <- mean.stats.assist %>%
     name=="household_size" ~ "Household Size",
     name=="num_children_subject" ~ "No. of Children",
     name=="Obs" ~ "Total HHs (millions)",
+    name=="Uninsured" ~ "Total Uninsured (millions)",
     TRUE ~ name
   ))
 

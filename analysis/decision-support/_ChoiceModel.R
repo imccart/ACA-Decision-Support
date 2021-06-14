@@ -73,6 +73,8 @@ for (i in 1:nrow(choice.regs)) {
 bs.choice.data <- full.nest %>% 
   mutate(hh.final = map(data_full, ~.x %>% distinct(.x$household_number)))
 
+poss.tidy <- possibly(.f = tidy, otherwise=NULL)
+
 max.boot <- 200
 for (b in 1:max.boot) {  
   bs.choice.run <- bs.choice.data %>%

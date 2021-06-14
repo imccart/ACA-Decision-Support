@@ -104,14 +104,16 @@ bs.metal.boot.cond <- bs.pred.purchase %>%
 
 bs.metal.summary <- bs.metal.boot %>% ungroup() %>%
   group_by(metal) %>%
-  summarize(p01=quantile(att, 0.01),
+  summarize(mean=mean(att,na.rm=TRUE),
+            p01=quantile(att, 0.01),
             p05=quantile(att, 0.05),
             p95=quantile(att, 0.95),
             p99=quantile(att, 0.99))
 
 bs.metal.summary.cond <- bs.metal.boot.cond %>% ungroup() %>%
   group_by(metal) %>%
-  summarize(p01=quantile(att, 0.01),
+  summarize(mean=mean(att,na.rm=TRUE),
+            p01=quantile(att, 0.01),
             p05=quantile(att, 0.05),
             p95=quantile(att, 0.95),
             p99=quantile(att, 0.99))
@@ -142,7 +144,8 @@ bs.ins.boot.cond <- bs.pred.purchase %>%
 
 bs.ins.summary <- bs.ins.boot %>% ungroup() %>%
   group_by(insurer) %>%
-  summarize(p01=quantile(att, 0.01),
+  summarize(mean=mean(att,na.rm=TRUE),
+            p01=quantile(att, 0.01),
             p05=quantile(att, 0.05),
             p95=quantile(att, 0.95),
             p99=quantile(att, 0.99))
@@ -150,7 +153,8 @@ bs.ins.summary <- bs.ins.boot %>% ungroup() %>%
 
 bs.ins.summary.cond <- bs.ins.boot.cond %>% ungroup() %>%
   group_by(insurer) %>%
-  summarize(p01=quantile(att, 0.01),
+  summarize(mean=mean(att,na.rm=TRUE),
+            p01=quantile(att, 0.01),
             p05=quantile(att, 0.05),
             p95=quantile(att, 0.95),
             p99=quantile(att, 0.99))
