@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Insurance choice, decision assistance, and insurer steering</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="ASHEcon Annual Conference" />
+    <meta name="date" content="2021-06-23" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#E68080"],"pen_size":3,"eraser_size":30}) })</script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Insurance choice, decision assistance, and insurer steering
+## Ian McCarthy &amp; Evan Saltzman
+### ASHEcon Annual Conference
+### June 23, 2021
+
+---
+
+
+&lt;!-- Adjust some CSS code for font size, maintain R code font size --&gt;
+&lt;style type="text/css"&gt;
+.remark-slide-content {
+    font-size: 30px;
+    padding: 1em 2em 1em 2em;    
+}
+.remark-code, .remark-inline-code { 
+    font-size: 20px;
+}
+&lt;/style&gt;
+
+
+&lt;!-- Set R options for how code chunks are displayed and load packages --&gt;
+
+
+
+
+
+# Decisions are hard
+
+.center[
+  ![](https://media.giphy.com/media/Lp9wng87dsScq2owim/giphy.gif)
+]
+
+---
+# In the health insurance setting...
+
+1. Insurance choice is confusing, particularly on the ACA exchanges
+
+2. Size of the market introduces decision problems on a massive scale
+
+---
+# 1. Insurance choice is confusing
+
+.center[
+  ![](../pics/slate-2017.png)
+]
+    
+.footnote[
+  [Slate, 2017](https://slate.com/business/2017/08/americans-are-overpaying-for-insurance-because-obamacare-is-confusing.html)
+]
+  
+---
+count: false
+
+# 1. Insurance choice is confusing
+.center[
+  ![](../pics/health-affairs-2017b.png)
+]
+    
+.footnote[
+  [Health Affairs, January, 2017](https://www.healthaffairs.org/doi/10.1377/hlthaff.2016.0472)
+]
+
+
+---
+count: false
+
+# 1. Insurance choice is confusing
+
+.center[
+  ![](../pics/health-affairs-2017.png)
+]
+    
+.footnote[
+  [Health Affairs, August, 2017](https://www.healthaffairs.org/doi/full/10.1377/hlthaff.2017.0085)
+]
+
+    
+---
+# 2. Potential scale
+
+- 12.7 million enrollees on exchanges in 2016
+
+- Down to 11.4 million in 2020
+
+- Over 27 million remain uninsured
+
+---
+count: false
+
+# 2. Potential scale
+
+.center[
+  ![:scale 75%](../pics/kff-uninsured.png)
+]
+    
+
+---
+# This paper
+
+Lots of people participating in a very complicated decision. With this in mind, we ask the following questions:
+
+1. Does some form of decision assistance affect plan selection?
+
+2. Does decision assistance "improve" plan selection?
+
+3. Do insurers use brokers/agents to steer people to different plans?
+
+4. (not today) What are the welfare effects?
+
+---
+# What's new?
+
+- Large literature on choice inconsistencies
+  - Abaluck and Gruber, *AER*, 2011
+  - Ketcham et al., *AER*, 2012
+  - Gruber, *JEP*, 2017
+
+- What's new here?
+  - Role of decision assistance in health
+  - Commissions and steering
+
+---
+class: inverse
+
+# Outline of talk
+
+1. [Data](#data)
+2. [Effects of decision assistance](#decision-assist)
+3. [Dominated choices](#dominated)
+4. [Insurer steering](#steering)
+
+
+---
+class: inverse, center, middle
+name: data
+
+# Data
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+
+---
+# Sources
+
+Main enrollment come from Covered California under FOIA. This includes:
+- Individual demographics and income
+- Plan purchases
+- Information on type of assistance (if any)
+- 8.3 million households, 4.5 million new enrollees
+
+Supplemental data include:
+- ACS and SIPP for predicting uninsured
+- ACA program data (contribution percentages, rating areas, etc.)
+
+---
+# Households
+
+
+
+
+&lt;table class="table" style="font-size: 17px; width: auto !important; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Variable &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Assisted &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Unassisted &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Overall &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr grouplength="5"&gt;&lt;td colspan="4" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;Household Demographics&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Household Size &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.47 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.36 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.41 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; No. of Children &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.06 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.06 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Percent Black &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.02 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.03 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.02 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Percent Hispanic &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.22 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.26 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Percent White &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.35 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.30 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr grouplength="4"&gt;&lt;td colspan="4" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;Income relative to FPL&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; below 138% &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.04 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; between 138 and 250% &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.71 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.67 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; between 250 and 400% &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.19 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.19 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.19 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; above 400% &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.07 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.11 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Total HHs (millions) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.73 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.59 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.32 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Total Uninsured (millions) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.25 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+
+---
+# Plan choice: Insurers
+
+.pull-left[
+  ![](../../figures/insurer_stack_any.png)
+]
+
+.pull-right[
+  ![](../../figures/insurer_stack_all.png)
+]
+
+
+---
+# Plan choice: Metal tiers
+
+.pull-left[
+  ![](../../figures/metal_stack_any.png)
+]
+
+.pull-right[
+  ![](../../figures/metal_stack_all.png)
+
+]
+
+
+
+---
+class: inverse, center, middle
+name: decision-assist
+
+# Effect of decision assistance on plan choice
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+---
+# Estimand of interest
+
+- Want to identify the Average Treatment Effect on the Treated (ATT) of decision assistance
+
+- Denote by `\(Pr[Y_{ij}^{1}]\)` the probability of household `\(i\)` selecting plan `\(j\)` with decision assistance
+
+- Denote by `\(Pr[Y_{ij}^{0}]\)` the probability of household `\(i\)` selecting plan `\(j\)` without decision assistance
+
+--
+
+`$$ATT = Pr[Y_{ij}^{1} | \text{Assist}] - Pr[Y_{ij}^{0} | \text{Assist}]$$`
+
+
+---
+# Estimation
+
+1. Calculate predicted probability of decision assistance from logit model
+
+--
+
+.pull-left[
+  ![:scale 80%](../../figures/ps_assist_full.png)
+]
+
+
+.pull-right[
+  ![:scale 80%](../../figures/cov_balance.png)
+]
+
+---
+count: false
+
+# Estimation
+
+1. Calculate predicted probability of decision assistance from logit model
+2. Estimate weighted multinomial logit model among those without any decision assistance, `\(\hat{\theta}\)`, with weights `\(\frac{\hat{p}}{1-\hat{p}}\)`
+3. Use `\(\hat{\theta}\)` to form predicted counterfactual, `\(\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}\)`
+4. Use predicted value in ATT estimate: `$$\underbrace{Pr[Y_{ij}^{1} | \text{Assist}]}_{Observed} - \underbrace{\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}}_{Predicted}$$`
+5. Aggregate to level of insurer and metal
+
+
+---
+count: false
+
+# Estimation
+
+- Focus only on new enrollees to avoid presence of inertia
+
+- Estimate separately by year and rating area
+
+
+
+---
+# Inference
+
+- 200 bootstrap replications
+
+- Confidence interval based on the 5th and 95th percentile of bootstrap replications
+
+
+---
+# Effects of decision assistance
+
+.pull-left[
+  ![](../../figures/choice_metals.png)
+]
+
+.pull-right[
+  ![](../../figures/choice_insurer.png)
+]
+
+
+---
+class: inverse, center, middle
+name: dominated
+
+# Analysis of dominated choices
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+---
+# What is a dominated choice?
+
+&lt;center&gt;
+&lt;blockquote class="twitter-tweet" data-lang="en"&gt;&lt;p lang="en" dir="ltr"&gt;&lt;a href="https://twitter.com/DaveEvansPhD/status/1234506064470716416"&gt;March 2, 2020&lt;/a&gt;&lt;/blockquote&gt;&lt;script async src="//platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+&lt;/center&gt;
+
+---
+count: false
+
+# What is a dominated choice?
+
+In our context...
+
+- Subsidies available for households with incomes below 250% of the FPL
+- At 150% of the FPL, larger subsidies are such that actuarial value of silver plans exceeds that of gold and platinum plans
+- Gold and platinum plans dominated by silver plans for incomes `\(\leq\)` 150% FPL
+- Gold plans dominated by silver plans for incomes between 150% and 200% FPL
+
+--
+
+About 3.2% of households make a dominated choice in our data
+
+---
+# Estimation and identification
+
+1. Calculate predicted probability, `\(\hat{p}\)`, of decision assistance from logit model
+
+2. Estimate weighted logit model of dominated choice among those without any decision assistance, `\(\hat{\beta}\)`, with weights given by  `\(\frac{\hat{p}}{1-\hat{p}}\)`
+
+3. Use `\(\hat{\beta}\)` to form predicted counterfactual, `\(\widehat{Pr[Y_{i}^{0} | \text{Assist}]}\)`
+
+4. Use predicted value in ATT estimate: `$$\underbrace{Pr[Y_{i}^{1} | \text{Assist}]}_{Observed} - \underbrace{\widehat{Pr[Y_{i}^{0} | \text{Assist}]}}_{Predicted}$$`
+
+
+---
+# Decision assistance and dominated choices
+
+.center[
+  ![:scale 50%](../../figures/dom_choice.png)
+]
+
+
+
+
+---
+class: inverse, center, middle
+name: steering
+
+# *Preliminary* analysis of insurer steering
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=1055px&gt;&lt;/html&gt;
+
+
+---
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Flat commission 
+- Fixed amount from &lt;span&gt;&amp;#36;&lt;/span&gt;0 to &lt;span&gt;&amp;#36;&lt;/span&gt;264
+
+]
+
+.pull-right[
+  ![](../pics/flat_comm.jpg)
+]
+
+---
+count: false
+
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Percentage commission
+- Percent of annual premium, from 1% to 5%
+]
+
+.pull-right[
+  ![](../pics/perc_comm.jpg)
+]
+
+---
+count: false
+
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Flat commission, from &lt;span&gt;&amp;#36;&lt;/span&gt;0 to &lt;span&gt;&amp;#36;&lt;/span&gt;264
+- Percentage commission, from 1% to 5% of annual premium
+
+]
+
+--
+
+.pull-right[
+**Sources of variation**
+
+- Insurer
+- New enrollee versus renewal
+- Network type (e.g., HMO vs PPO)
+
+]
+
+---
+# Quantifying steering effect
+
+1. Estimate nested logit choice model with commission as covariate
+2. Compute commission elasticity (percent change in demand for a 1% increase in commission)
+
+--
+
+|                | Agent Users   | All Enrollees  |
+| -------------- |:-------------:| --------------:|
+| Overall        | 7.70          | 3.69           |
+| Large Insurers | 8.07          | 3.86           |
+| Small Insurers | 5.30          | 2.57           |
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

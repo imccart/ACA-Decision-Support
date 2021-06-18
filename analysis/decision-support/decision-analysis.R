@@ -14,7 +14,7 @@ if (!require("pacman")) renv::install('pacman')
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stargazer, knitr, kableExtra,
                lfe, modelr, mclogit, bookdown, parallel, nnet, mixl, fixest,
                future.apply, gtsummary, emo, twilio, SAScii, data.table, scales, mlogit,
-               modelsummary, cobalt, WeightIt, broom, tidymodels)
+               modelsummary, cobalt, WeightIt, broom, tidymodels, webshot)
 
 source('paths.R')
 source(paste0(common,"/common_functions.R"))
@@ -135,7 +135,8 @@ hh.full <- hh.full %>%
 ## Filter for only new purchases for plan choice analysis
 hh.clean <- hh.full %>% 
   filter(is.na(previous_plan_offered))
-  
+
+hh.ins <- hh.full %>% filter(!is.na(plan_number_nocsr))  
 
 # Run analysis scripts ----------------------------------------------------
 

@@ -33,7 +33,7 @@ kable(metal.assist.all[,2:4], format="latex",
   save_kable("tables/metal_assistance.tex")
 
 ## figure of assistance and tier choice
-ggplot(hh.full) +
+ggplot(hh.ins) +
   geom_bar(mapping=aes(x=channel_detail,fill=metal),
            position="fill", color="black", size=.1) +
   labs(
@@ -43,7 +43,7 @@ ggplot(hh.full) +
   theme(legend.title=element_blank()) +
   scale_fill_brewer(palette="Greys") + ggsave("figures/metal_stack_all.png")
 
-ggplot(hh.full) +
+ggplot(hh.ins) +
   geom_bar(mapping=aes(x=channel,fill=metal),
            position="fill", color="black", size=.1) +
   labs(
@@ -55,7 +55,7 @@ ggplot(hh.full) +
 
 
 ## figure of assistance and insurer
-hh.full %>% mutate(insurer = case_when(
+hh.ins %>% mutate(insurer = case_when(
   insurer=="Blue_Shield" ~ "BCBS",
   insurer=="Health_Net" ~ "HealthNet",
   insurer=="Anthem" ~ "Anthem",
@@ -73,7 +73,7 @@ hh.full %>% mutate(insurer = case_when(
   scale_fill_brewer(palette="Greys") + ggsave("figures/insurer_stack_all.png")
 
 
-hh.full %>% mutate(insurer = case_when(
+hh.ins %>% mutate(insurer = case_when(
   insurer=="Blue_Shield" ~ "BCBS",
   insurer=="Health_Net" ~ "HealthNet",
   insurer=="Anthem" ~ "Anthem",
@@ -302,24 +302,38 @@ sum.stats.unassist2 <- sum.stats.data %>% filter(assisted==0, Uninsured==0) %>%
 
 
 
-sum.stats.all <- sum.stats.data %>%
+sum.stats.all1 <- sum.stats.data %>%
   summarize(across(c("household_size","num_children_subject", "perc_black", "perc_hispanic", "perc_white",
-                     "FPL_low","FPL_250","FPL_400","FPL_high","Kaiser","Anthem","BlueShield","HealthNet",
-                     "Uninsured","Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
+                     "FPL_low","FPL_250","FPL_400","FPL_high"),
+                   list(Mean=mean, N=~n(),
+                        q1=~quantile(., probs=0.10, na.rm=TRUE),
+                        q9=~quantile(., probs=0.90, na.rm=TRUE)),
+                   na.rm=TRUE,
+                   .names="{col}_{fn}"))
+sum.stats.all2 <- sum.stats.data %>% filter(Uninsured==0) %>%
+  summarize(across(c("Kaiser","Anthem","BlueShield","HealthNet",
+                     "Other","Bronze","Gold","Silver","Platinum","Catastrophic","HMO","PPO","EPO","HSP"),
                    list(Mean=mean, N=~n(),
                         q1=~quantile(., probs=0.10, na.rm=TRUE),
                         q9=~quantile(., probs=0.90, na.rm=TRUE)),
                    na.rm=TRUE,
                    .names="{col}_{fn}"))
 
+
+
 tot.count <- nrow(sum.stats.data)/1000000
 assist.count <- nrow(sum.stats.data %>% filter(assisted==1))/1000000
 unassist.count <- nrow(sum.stats.data %>% filter(assisted==0))/1000000
 tot.unins <- nrow(sum.stats.data %>% filter(Uninsured==1))/1000000
-mean.stats.all <- sum.stats.all %>% select(ends_with("_Mean")) %>%
+mean.stats.all1 <- sum.stats.all1 %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
                values_to="Overall") %>%
-  mutate(name=str_remove(name,"_Mean")) %>%
+  mutate(name=str_remove(name,"_Mean"))
+mean.stats.all2 <- sum.stats.all2 %>% select(ends_with("_Mean")) %>%
+  pivot_longer(cols=ends_with("_Mean"),
+               values_to="Overall") %>%
+  mutate(name=str_remove(name,"_Mean"))
+mean.stats.all <- mean.stats.all1 %>% bind_rows(mean.stats.all2) %>%
   bind_rows(as_tibble(tot.count) %>% mutate(name="Obs") %>% rename(Overall=value))
 mean.stats.assist <- sum.stats.assist %>% select(ends_with("_Mean")) %>%
   pivot_longer(cols=ends_with("_Mean"),
@@ -373,4 +387,22 @@ kable(final.sum.stats, format="latex",
   pack_rows("Metal Tier",15, 19) %>%
   pack_rows("Network Type", 20, 23) %>%
   save_kable("tables/summary_stats.tex")
+
+options(knitr.kable.NA = '')
+kable(final.sum.stats %>% filter(name %in% c("Household Size", "No. of Children",
+                                             "Percent Black", "Percent White",
+                                             "Percent Hispanic","below 138%", "between 138 and 250%",
+                                             "between 250 and 400%", "above 400%",
+                                             "Total HHs (millions)", "Total Uninsured (millions)")), 
+      format="html",
+      col.names = c("Variable","Assisted","Unassisted","Overall"),
+      digits=c(0,2,2,2),
+      booktabs=T) %>%
+  pack_rows("Household Demographics", 1, 5) %>%  
+  pack_rows("Income relative to FPL", 6, 9) %>%
+  kable_styling(full_width=F) %>%
+  save_kable("tables/hh_sum_stats.html")
+
+webshot('tables/hh_sum_stats.html', file='tables/hh_sum_stats.png')
+save(final.sum.stats, file="finals/ashecon/final_summary.Rdata")
 

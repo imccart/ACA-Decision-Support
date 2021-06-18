@@ -11,7 +11,7 @@
 dchoice.reg <- function(d, nest.names) {
 
   ## Terms for estimation
-  all_covars=c("premium", "silver", "gold", "platinum")
+  all_covars=c("premium", "silver", "bronze","hh_size_prem")
   ins.offer <- c(0,0)
   cml.share <- 0
   tot.choice <- sum(d$choice==1)
