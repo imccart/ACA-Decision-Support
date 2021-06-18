@@ -76,7 +76,7 @@ xaringanExtra::use_scribble(rgb(0.9, 0.5, 0.5))
 
 1. Insurance choice is confusing, particularly on the ACA exchanges
 
-2. Size of the market introduces decision problems on a massive scale
+2. Size of the market introduces decision problems on a large scale
 
 ---
 # 1. Insurance choice is confusing
