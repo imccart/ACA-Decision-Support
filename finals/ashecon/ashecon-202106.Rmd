@@ -332,7 +332,7 @@ count: false
 # Estimation
 
 1. Calculate predicted probability of decision assistance from logit model
-2. Estimate weighted multinomial logit model among those without any decision assistance, $\hat{\theta}$, with weights $\frac{\hat{p}}{1-\hat{p}}$
+2. Estimate weighted nested logit model among those without any decision assistance, $\hat{\theta}$, with weights $\frac{\hat{p}}{1-\hat{p}}$
 3. Use $\hat{\theta}$ to form predicted counterfactual, $\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}$
 4. Use predicted value in ATT estimate: $$\underbrace{Pr[Y_{ij}^{1} | \text{Assist}]}_{Observed} - \underbrace{\widehat{Pr[Y_{ij}^{0} | \text{Assist}]}}_{Predicted}$$
 5. Aggregate to level of insurer and metal
