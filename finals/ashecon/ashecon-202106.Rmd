@@ -158,6 +158,7 @@ Lots of people participating in a very complicated decision. With this in mind, 
 
 - What's new here?
   - Role of decision assistance in health
+  - Public and private decision assistance in the same market
   - Commissions and steering
 
 ---
@@ -192,6 +193,45 @@ Main enrollment come from Covered California under FOIA. This includes:
 Supplemental data include:
 - ACS and SIPP for predicting uninsured
 - ACA program data (contribution percentages, rating areas, etc.)
+
+
+---
+# What is "decision assistance"?
+
+- Public decision assistance in the form of "navigators"
+- Private brokers and agents (majority are brokers)
+
+---
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Flat commission 
+- Fixed amount from <span>&#36;</span>0 to <span>&#36;</span>264
+
+]
+
+.pull-right[
+  ![](../pics/flat_comm.jpg)
+]
+
+---
+count: false
+
+# Agent compensation
+
+.pull-left[
+**Compensation schemes**
+
+- Percentage commission
+- Percent of annual premium, from 1% to 5%
+]
+
+.pull-right[
+  ![](../pics/perc_comm.jpg)
+]
+
 
 ---
 # Households
@@ -388,60 +428,6 @@ name: steering
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=1055px></html>
 
 
----
-# Agent compensation
-
-.pull-left[
-**Compensation schemes**
-
-- Flat commission 
-- Fixed amount from <span>&#36;</span>0 to <span>&#36;</span>264
-
-]
-
-.pull-right[
-  ![](../pics/flat_comm.jpg)
-]
-
----
-count: false
-
-# Agent compensation
-
-.pull-left[
-**Compensation schemes**
-
-- Percentage commission
-- Percent of annual premium, from 1% to 5%
-]
-
-.pull-right[
-  ![](../pics/perc_comm.jpg)
-]
-
----
-count: false
-
-# Agent compensation
-
-.pull-left[
-**Compensation schemes**
-
-- Flat commission, from <span>&#36;</span>0 to <span>&#36;</span>264
-- Percentage commission, from 1% to 5% of annual premium
-
-]
-
---
-
-.pull-right[
-**Sources of variation**
-
-- Insurer
-- New enrollee versus renewal
-- Network type (e.g., HMO vs PPO)
-
-]
 
 ---
 # Quantifying steering effect
