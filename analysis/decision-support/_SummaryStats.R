@@ -56,7 +56,7 @@ ggplot(hh.ins) +
 
 ## figure of assistance and insurer
 hh.ins %>% mutate(insurer = case_when(
-  insurer=="Blue_Shield" ~ "BCBS",
+  insurer=="Blue_Shield" ~ "Blue Shield",
   insurer=="Health_Net" ~ "HealthNet",
   insurer=="Anthem" ~ "Anthem",
   insurer %in% c("Chinese_Community", "Contra_Costa", "Molina", "LA_Care","Oscar","SHARP","United","Valley","Western") ~ "Other",
@@ -74,7 +74,7 @@ hh.ins %>% mutate(insurer = case_when(
 
 
 hh.ins %>% mutate(insurer = case_when(
-  insurer=="Blue_Shield" ~ "BCBS",
+  insurer=="Blue_Shield" ~ "Blue Shield",
   insurer=="Health_Net" ~ "HealthNet",
   insurer=="Anthem" ~ "Anthem",
   insurer %in% c("Chinese_Community", "Contra_Costa", "Molina", "LA_Care","Oscar","SHARP","United","Valley","Western") ~ "Other",
